@@ -588,12 +588,16 @@ $('parse').onclick=parseEvents;$('policy').onchange=()=>{if(!save)return;save.se
 $('attrs').onclick=e=>{let b=e.target.closest('[data-k]');if(!b)return;let used=Object.keys(stats).reduce((n,k)=>n+stats[k]-1,0),d=+b.dataset.d,k=b.dataset.k;if(d<0&&stats[k]>1||d>0&&stats[k]<4&&used<8)stats[k]+=d;renderStats()};
 renderStats();renderTeam();$('origin').onchange();
 // ===== LunaTalk 嵌入（由外層頁面載入時啟用）=====
-(function(){var K=null;try{K=window.parent!==window&&window.parent.KJ?window.parent.KJ:null}catch(e){}
- if(!K)return;$('embedBar').classList.remove('hidden');
- function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;toast(K.fill(t,send))}
+(function(){if(window.parent===window)return;$('embedBar').classList.remove('hidden');
+ var P=window.parent;function post(m){try{P.postMessage(Object.assign({kj:1},m),'*')}catch(e){}}
+ function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send})}
  $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);
- window.kjStat=function(s){$('autoStat').textContent='自動接收 AI 事件：'+s};
- window.kjIngest=function(t){let r=ingestReply(t);if(r.status!=='nosave')toast('已自動接收 AI 回覆'+(r.msg?'：'+r.msg:''));return r};
+ addEventListener('message',function(e){var d=e.data;if(!d||d.kj!==1||e.source!==P)return;
+  if(d.t==='stat')$('autoStat').textContent='自動接收 AI 事件：'+d.s;
+  else if(d.t==='fillres')toast(d.s);
+  else if(d.t==='events'){var r;try{r=ingestReply(d.text)}catch(x){r={status:'error',msg:String(x)}}
+   if(r.status!=='nosave')toast('已自動接收 AI 回覆'+(r.msg?'：'+r.msg:''));post({t:'ingested',id:d.id,status:r.status,msg:r.msg||''})}});
+ post({t:'hello'});
 })();
 })();
 
