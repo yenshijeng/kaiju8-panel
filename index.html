@@ -77,7 +77,7 @@ textarea{min-height:100px;resize:vertical}
 <section id="battle" class="screen hidden"><div class="grid2"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
 <div class="row"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
 <div id="modeNote" class="muted" style="margin-top:6px;font-size:13px"></div><div id="reaction" class="notice hidden" style="margin-top:9px"></div><div id="wdBox" class="notice hidden" style="margin-top:9px"></div><div id="hint" class="hint hidden"></div><div class="row" style="margin-top:8px"><button id="replayHints" class="ghost">重看教學提示</button></div></div><div><div class="card"><h3>隊員狀態</h3><div id="battleParty" class="party"></div></div><div class="card"><h3>任務目標</h3><div id="objective"></div><h3>作戰紀錄</h3><div id="combatLog" class="log"></div></div></div></div></section>
-<section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>交給 LunaTalk 的快照</h3><label>玩家自己的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><button id="snapshot" class="primary">產生快照</button> <button id="copySnap">複製</button><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">產生快照並填入聊天輸入框</button> <button id="sendBtn">填入並送出</button><div class="muted" id="autoStat" style="margin-top:6px">自動接收 AI 事件：待命</div></div><textarea id="snapshotOut" readonly></textarea></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（含敘事與 kaiju-events 區塊）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">驗證事件候選</button><label>事件審核政策</label><select id="policy"><option value="auto-low">低影響情報自動套用（可撤銷），其他交我審核</option><option value="review-all">全部交我審核</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>待審核事件</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
+<section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>交給 LunaTalk 的快照</h3><label>玩家自己的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><button id="snapshot" class="primary">產生快照</button> <button id="copySnap">複製</button><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">產生快照並填入聊天輸入框</button> <button id="sendBtn">填入並送出</button><label style="display:block;margin-top:6px"><input type="checkbox" id="autoAttach"> 送出聊天時自動附上最新快照（直接在聊天框打字即可）</label><div class="muted" id="autoStat" style="margin-top:6px">自動接收 AI 事件：待命</div></div><textarea id="snapshotOut" readonly></textarea></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（含敘事與 kaiju-events 區塊）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">驗證事件候選</button><label>事件審核政策</label><select id="policy"><option value="auto-low">低影響情報自動套用（可撤銷），其他交我審核</option><option value="review-all">全部交我審核</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>待審核事件</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
 </section></main>
 <script>
 (function(){
@@ -177,7 +177,7 @@ function newCampaign(){let origin=$('origin').value,name=$('name').value.trim()|
  roster.slice(1).forEach(a=>save.narrativeState.relationships[a.id]={stage:'普通',friction:false});
  persist(true);enterGame('campaign')}
 // ===== 存檔、備份、遷移 =====
-function persist(bump){if(!save)return;if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
+function persist(bump){if(!save)return;if(window.__kjArmSoon)setTimeout(window.__kjArmSoon,350);if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
  try{lsSet(PREFIX+save.campaignId,JSON.stringify(save));let list=JSON.parse(lsGet(INDEX)||'[]').filter(x=>x.campaignId!==save.campaignId);list.unshift({campaignId:save.campaignId,name:save.campaign.name,savedAt:save.savedAt});lsSet(INDEX,JSON.stringify(list.slice(0,20)));$('saved').textContent='已自動儲存 · 修訂 '+save.revision;$('export').disabled=false}catch(e){$('saved').textContent='儲存失敗，請匯出 JSON'}}
 function backupNow(reason){if(!save)return;try{let cur=lsGet(PREFIX+save.campaignId);if(!cur)return;let list=JSON.parse(lsGet(BACKUP+save.campaignId)||'[]');let d=JSON.parse(cur);list.unshift({at:now(),reason,revision:d.revision,schemaVersion:d.schemaVersion,data:cur});lsSet(BACKUP+save.campaignId,JSON.stringify(list.slice(0,3)))}catch(e){}}
 function verParts(v){let m=/^(\d+)\.(\d+)\.(\d+)$/.exec(String(v||''));return m?[+m[1],+m[2],+m[3]]:null}
@@ -507,7 +507,7 @@ function resumeBattle(){let m=M();if(!m||m.phase!=='battle')return;stopTimers();
  if(m.activeActorId){let u=findUnit(m.activeActorId);if(u&&u.kind==='enemy'&&m.intent[u.id]){m.orderIndex=Math.max(0,m.order.indexOf(u.id))}}
  m.activeActorId=null;renderBattle();queueAdvance()}
 // ===== AI 交接 =====
-function makeSnapshot(){let action=$('playerAction').value.trim();if(!action&&!confirm('還沒有輸入你的行動或對話。仍要產生快照嗎？'))return;
+function buildSnap(action){
  let m=M(),last=save.missionHistory[save.missionHistory.length-1],pr=rosterPlayer(),ns=save.narrativeState,lo=loadout('player');
  let flags=Object.keys(ns.flagValues).map(f=>(ns.flagRegistry[f]?ns.flagRegistry[f].label:f)+'：'+ns.flagValues[f]);
  let since=last?last.completedAt:save.createdAt,recent=save.progression.growthPoints.history.filter(h=>h.source==='spent'&&h.at>since).map(h=>h.label);
@@ -517,8 +517,11 @@ function makeSnapshot(){let action=$('playerAction').value.trim();if(!action&&!c
   participants:save.roster.filter(a=>a.id!=='player'&&squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,role:'隊伍成員',tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id),relevantCondition:injuryText(a.injury),relationship:(ns.relationships[a.id]?ns.relationships[a.id].stage+(ns.relationships[a.id].friction?'（有摩擦）':''):'普通'),knownFacts:ns.intel.filter(i=>i.scope==='squad'||(i.knownBy||[]).includes(a.id)).map(i=>i.text)})),
   availableMembers:save.roster.filter(a=>a.id!=='player'&&!squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id)})),
   narrativeState:{relevantIntel:ns.intel.filter(i=>i.scope==='player'||i.scope==='squad').map(i=>i.text),relevantFlags:flags},playerAction:action};
- let bt=String.fromCharCode(96).repeat(3),tail='\n\n【回覆格式｜請照做】先寫敘事。敘事結束後，若有值得記錄的事，附上下面這個區塊（用 kaiju-events 當語言標籤，內容必須是 JSON，不是 YAML，也不要用 json 當標籤；欄位原樣照抄，只改 events）。沒有事件就維持 "events": []。\n'+bt+'kaiju-events\n'+JSON.stringify({protocol:'kaiju.events/v1',campaignId:s.campaignId,snapshotId:s.snapshotId,sourceRevision:s.sourceRevision,events:[]})+'\n'+bt+'\n事件寫法：{"id":"唯一字串","type":"intel.record","targetId":null,"payload":{"text":"一句話情報"},"basis":{"quote":"從你的敘事逐字複製的一句"}}。type 只能是 intel.record、relationship.setStage、relationship.setFriction、story.flag.set、narrative.condition.set；不可自創 type 或欄位。NPC 確認、採信玩家情報時，請附一筆 intel.record。';
- $('snapshotOut').value=JSON.stringify(s,null,2)+tail;save.snapshotRegistry.push({snapshotId:s.snapshotId,sourceRevision:s.sourceRevision,createdAt:s.createdAt,processed:false});persist(false)}
+ return s}
+function replyTail(s){let bt=String.fromCharCode(96).repeat(3),tail='\n\n【回覆格式｜請照做】先寫敘事。敘事結束後，若有值得記錄的事，附上下面這個區塊（用 kaiju-events 當語言標籤，內容必須是 JSON，不是 YAML，也不要用 json 當標籤；欄位原樣照抄，只改 events）。沒有事件就維持 "events": []。\n'+bt+'kaiju-events\n'+JSON.stringify({protocol:'kaiju.events/v1',campaignId:s.campaignId,snapshotId:s.snapshotId,sourceRevision:s.sourceRevision,events:[]})+'\n'+bt+'\n事件寫法：{"id":"唯一字串","type":"intel.record","targetId":null,"payload":{"text":"一句話情報"},"basis":{"quote":"從你的敘事逐字複製的一句"}}。type 只能是 intel.record、relationship.setStage、relationship.setFriction、story.flag.set、narrative.condition.set；不可自創 type 或欄位。NPC 確認、採信玩家情報時，請附一筆 intel.record。';
+ return tail}
+function makeSnapshot(){let action=$('playerAction').value.trim();if(!action&&!confirm('還沒有輸入你的行動或對話。仍要產生快照嗎？'))return;
+ let s=buildSnap(action);$('snapshotOut').value=JSON.stringify(s,null,2)+replyTail(s);save.snapshotRegistry.push({snapshotId:s.snapshotId,sourceRevision:s.sourceRevision,createdAt:s.createdAt,processed:false});persist(false)}
 function validateEvent(e){if(!e||typeof e!=='object')return '格式錯誤';let keys=Object.keys(e),allowed=['id','type','targetId','payload','basis'];let extra=keys.filter(k=>!allowed.includes(k));if(extra.length)return '含不允許的欄位：'+extra.join(', ');
  if(!PAYLOAD_KEYS[e.type])return '未註冊的事件類型 '+e.type;let p=e.payload;if(!p||typeof p!=='object')return '缺少 payload';let bad=Object.keys(p).filter(k=>!PAYLOAD_KEYS[e.type].includes(k));if(bad.length)return 'payload 含不允許的欄位：'+bad.join(', ');
  let tid=e.targetId==null?null:e.targetId,ally=id=>save.roster.some(a=>a.id===id&&a.kind==='ally');
@@ -605,9 +608,20 @@ renderStats();renderTeam();$('origin').onchange();
  addEventListener('message',function(e){var d=e.data;if(!d||d.kj!==1||e.source!==P)return;
   if(d.t==='stat')$('autoStat').textContent='自動接收 AI 事件：'+d.s;
   else if(d.t==='fillres')toast(d.s);
+  else if(d.t==='consumed'){let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;persist(false)}armedId=null;arm()}
   else if(d.t==='events'){var r;try{r=ingestReply(d.text)}catch(x){r={status:'error',msg:String(x)}}
    if(r.status!=='nosave')toast('已自動接收 AI 回覆'+(r.msg?'：'+r.msg:''));post({t:'ingested',id:d.id,status:r.status,msg:r.msg||''})}});
- post({t:'hello'});
+ var armedRev=null,armedCamp=null,armedId=null;
+ function arm(){if(!$('autoAttach').checked||!save){post({t:'arm',off:true});return}
+  if(armedId&&armedRev===save.revision&&armedCamp===save.campaignId)return;
+  save.snapshotRegistry=save.snapshotRegistry.filter(x=>!(x.armed&&!x.consumed));
+  let sn=buildSnap('');save.snapshotRegistry.push({snapshotId:sn.snapshotId,sourceRevision:sn.sourceRevision,createdAt:sn.createdAt,processed:false,armed:true});
+  armedRev=save.revision;armedCamp=save.campaignId;armedId=sn.snapshotId;persist(false);
+  post({t:'arm',id:sn.snapshotId,obj:sn,tail:replyTail(sn)})}
+ window.__kjArmSoon=function(){try{arm()}catch(x){}};
+ $('autoAttach').checked=(function(){try{return localStorage.getItem('kj.autoattach')==='1'}catch(x){return false}})();
+ $('autoAttach').onchange=function(){try{localStorage.setItem('kj.autoattach',this.checked?'1':'0')}catch(x){}armedId=null;arm()};
+ post({t:'hello'});setTimeout(window.__kjArmSoon,800);
 })();
 })();
 
