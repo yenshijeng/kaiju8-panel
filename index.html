@@ -529,9 +529,18 @@ function validateEvent(e){if(!e||typeof e!=='object')return '格式錯誤';let k
  return null}
 function kjSay(m){if(window.__kjAuto){window.__kjAuto.msg=m}else alert(m)}
 function ingestReply(text){if(!save)return {status:'nosave',msg:'尚未載入戰役'};window.__kjAuto={msg:''};try{$('aiReply').value=text;parseEvents();return {status:'done',msg:window.__kjAuto.msg||''}}catch(e){return {status:'error',msg:String(e&&e.message||e)}}finally{window.__kjAuto=null}}
+function lenientYaml(raw){let ev=[],cur=null,lines=raw.replace(/\r/g,'').split('\n');
+ lines.forEach(l=>{if(!l.trim())return;let m=l.match(/^\s*-\s+(\w+)\s*:\s*(.*)$/);if(m){cur={};ev.push(cur);cur[m[1]]=m[2].trim();return}m=l.match(/^\s+(\w+)\s*:\s*(.*)$/);if(m&&cur)cur[m[1]]=m[2].trim()});
+ if(!ev.length||!save)return null;
+ let snap=save.snapshotRegistry.slice().reverse().find(x=>!x.processed);if(!snap)return null;
+ let alias=/^(intel[_.]?(record|confirmed|confirm|gained|update)?|intel)$/i,out=[];
+ ev.forEach(e=>{let txt=(e.summary||e.text||'').replace(/^["']|["']$/g,'');
+  if(alias.test(e.type||'')&&txt)out.push({id:e.id||'',type:'intel.record',targetId:null,payload:{text:txt},basis:{note:'由非標準 YAML 轉換'}});
+  else out.push({id:e.id||'',type:String(e.type||'?'),payload:{}})});
+ return {protocol:'kaiju.events/v1',campaignId:save.campaignId,snapshotId:snap.snapshotId,sourceRevision:snap.sourceRevision,events:out}}
 function parseEvents(){let text=$('aiReply').value,bt=String.fromCharCode(96).repeat(3),re=new RegExp(bt+'\\s*kaiju-events\\s*([\\s\\S]*?)'+bt+'|~~~\\s*kaiju-events\\s*([\\s\\S]*?)~~~','i'),mt=text.match(re);
  if(!mt){kjSay('沒有 kaiju-events 區塊：只保留為敘事，不改變存檔。');return}
- let pack;try{pack=JSON.parse(mt[1]||mt[2])}catch(e){kjSay('事件 JSON 無法解析，未匯入任何候選。');return}
+ let pack,lenient=false,raw=mt[1]||mt[2];try{pack=JSON.parse(raw)}catch(e){pack=lenientYaml(raw);if(!pack){kjSay('事件 JSON 無法解析，未匯入任何候選。');return}lenient=true}
  if(pack.protocol!=='kaiju.events/v1'){kjSay('事件協定版本不符（需要 kaiju.events/v1），未匯入。');return}
  if(pack.campaignId!==save.campaignId){kjSay('事件屬於另一個戰役，未匯入。');return}
  if(!Array.isArray(pack.events)){kjSay('缺少 events 陣列，未匯入。');return}
@@ -545,7 +554,7 @@ function parseEvents(){let text=$('aiReply').value,bt=String.fromCharCode(96).re
   if(/"(hp|mp|ap|damage|injury|xp|experience|level|equipment|weapon|reward|points|impact|reviewLevel|autoApply)"\s*:/i.test(JSON.stringify(e))){save.eventHistory.push(Object.assign(base,{result:'驗證拒絕：觸及面板保留的機械資料或審核級別'}));summary.rejected++;return}
   let err=validateEvent(e);if(err){save.eventHistory.push(Object.assign(base,{result:'驗證拒絕：'+err}));summary.rejected++;return}
   let quoteOk=!!(e.basis&&e.basis.quote&&hasNarr&&narrative.includes(e.basis.quote));
-  let reason=stale?'快照已過期，需確認':!e.basis||(!e.basis.quote&&!e.basis.note)?'缺少場景依據':!hasNarr?'只貼事件區塊，依據無法核對':!quoteOk?'依據摘句在敘事中找不到':'待玩家審核';
+  let reason=lenient?'非標準 YAML 格式（已轉換），需確認':stale?'快照已過期，需確認':!e.basis||(!e.basis.quote&&!e.basis.note)?'缺少場景依據':!hasNarr?'只貼事件區塊，依據無法核對':!quoteOk?'依據摘句在敘事中找不到':'待玩家審核';
   let candidate={id,type:e.type,targetId:e.targetId==null?null:e.targetId,payload:e.payload,basis:e.basis||{},sourceRevision:pack.sourceRevision,snapshotId:pack.snapshotId,reviewReason:reason};
   if(e.type==='intel.record'&&autoEligible(candidate,quoteOk,stale)){applyEvent(candidate,e.payload,true);save.eventHistory.push(Object.assign(base,{result:'自動套用',payload:e.payload}));summary.auto++;return}
   if(e.type==='intel.record'&&reason==='待玩家審核')candidate.reviewReason=save.settings.reviewPolicy==='review-all'?'全部審核政策':'可能涉及秘密、過長、重複或指定角色，需確認';
