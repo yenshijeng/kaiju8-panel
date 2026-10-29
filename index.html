@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>怪獸 8 號戰術 RPG</title>
+<style>
+:root{--bg:#08131e;--panel:#112638;--line:#345267;--txt:#eef5f9;--muted:#a9bdcb;--cyan:#67d4e0;--gold:#e4bb63;--red:#ed7777;--green:#72d19a}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#18364a,#08131e 60%);color:var(--txt);font:15px/1.5 "Segoe UI","Microsoft JhengHei",sans-serif}
+button,input,select,textarea{font:inherit}
+button{color:var(--txt);background:#1a3b51;border:1px solid #4c7187;border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{background:#26566d}button:disabled{opacity:.45;cursor:not-allowed}button.on{background:#17677a;border-color:#58c6d4}
+.primary{background:#17677a;border-color:#58c6d4}.danger{background:#612d35;border-color:#a4565e}.gold{background:#67542d;border-color:#b6994e}.ghost{background:transparent}.mini{padding:3px 9px;font-size:13px}
+header{position:sticky;top:0;background:#08131eea;border-bottom:1px solid var(--line);padding:11px max(14px,calc((100vw - 1200px)/2));display:flex;justify-content:space-between;align-items:center;gap:10px;z-index:2}
+.brand{font-weight:800;letter-spacing:.08em}.brand small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+.tools,.row,.tabs{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+main{max-width:1200px;margin:20px auto;padding:0 14px 50px}
+.card{background:linear-gradient(145deg,#132a3bf2,#0c1b28f2);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 12px 30px #0003}
+.card h2,.card h3{margin:0 0 10px}.card h4{margin:12px 0 6px;color:var(--cyan);font-size:14px}
+.eyebrow{color:var(--cyan);letter-spacing:.16em;font-size:11px}.muted{color:var(--muted)}
+label{display:block;color:var(--muted);font-size:13px;margin:8px 0 4px}
+input,select,textarea{background:#07131e;color:var(--txt);border:1px solid #35566b;border-radius:7px;padding:8px;width:100%}
+textarea{min-height:100px;resize:vertical}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid2>*{min-width:0}
+.check{display:inline-flex;align-items:center;gap:6px;border:1px solid #345267;border-radius:7px;padding:6px 8px;margin:3px;color:var(--txt)}.check input{width:auto}
+.attr{display:grid;grid-template-columns:1fr auto auto auto;gap:7px;align-items:center;padding:5px;border-bottom:1px solid #294251}.attr button{padding:1px 9px}
+.hidden{display:none!important}.tabs{margin:0 0 12px}.tabs button.active{background:#17677a}
+.board{display:grid;grid-template-columns:repeat(8,minmax(42px,1fr));gap:4px;overflow:auto}
+.tile{height:60px;background:#132d3b;border:1px solid #2b4757;border-radius:5px;display:grid;place-items:center;cursor:pointer;position:relative;font-size:12px;padding:0;line-height:1.2}
+.tile:hover{border-color:var(--cyan)}.tile.wall{background:#3a4348;cursor:default}.tile.cache{box-shadow:inset 0 0 0 2px var(--gold)}.tile.exit{box-shadow:inset 0 0 0 2px var(--green)}
+.tile.warn{background:#692f39}.tile.move{outline:2px solid #5bcebb}.tile.target{outline:2px solid var(--red)}.tile.ally-target{outline:2px solid var(--green)}.tile.aoe{background:#7a5a24}.tile.active{border-color:var(--gold)}
+.small{font-size:10px;color:var(--muted)}.st{font-size:9px;color:var(--gold)}
+.token.player{color:#83e6f2;font-weight:700}.token.ally{color:#c6d7e2}.token.enemy{color:#ffaaa0}.token.down{color:#e6a35c}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.stat{background:#0a1924;padding:9px;border:1px solid #2b4757;border-radius:8px}.stat b{display:block;font-size:17px}
+.party{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:7px}.member{background:#0a1924;padding:9px;border:1px solid #2b4757;border-radius:8px}.member.down{border-color:#a4565e}
+.bar{height:6px;background:#253e4c;border-radius:9px;margin:4px 0}.bar i{display:block;height:100%;background:#70d39a}
+.log{max-height:220px;overflow:auto;padding:8px;background:#07131e;border:1px solid #294453;border-radius:8px}.log p{margin:4px 0;font-size:13px}
+.notice{border-left:3px solid var(--gold);padding:8px 10px;background:#dbb55712;color:#e6d5a8;border-radius:5px}
+.hint{border-left:3px solid var(--cyan);padding:8px 10px;background:#67d4e014;border-radius:5px;margin-top:9px}
+.event{padding:10px;margin:8px 0;border:1px solid #415b6b;border-radius:8px}
+.order{font-size:12px;color:var(--muted);margin:6px 0}.order b{color:var(--gold)}
+.result{font-size:20px;font-weight:800}.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;font-size:14px}
+.box{border:1px solid #294251;border-radius:9px;padding:10px;margin:8px 0;background:#0a1924}
+.shop{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;align-items:center;font-size:14px}
+.lo{display:grid;grid-template-columns:110px repeat(3,minmax(0,1fr));gap:6px;align-items:center;font-size:13px;margin:4px 0}
+.skill{border:1px solid #294251;border-radius:8px;padding:7px 9px;margin:5px 0;font-size:13px}
+@media(max-width:680px){header{align-items:flex-start;flex-direction:column;position:static}.grid2{grid-template-columns:1fr}.tile{height:46px;font-size:10px}.board{grid-template-columns:repeat(8,minmax(0,1fr));gap:3px}.card{padding:12px}.small,.st{font-size:8px}.statgrid{grid-template-columns:repeat(2,1fr)}.lo{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="brand">日本防衛隊<small>怪獸 8 號戰術 RPG · 前端垂直切片 · 存檔格式 1.3.0</small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><button id="load">載入</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
+<main>
+<section id="setup" class="card">
+<div class="eyebrow">CAMPAIGN SETUP</div><h2>建立防衛隊戰役</h2><p class="muted">選既有角色或建立新隊員。戰鬥屬性此後不可重分配，只能靠訓練提升。</p>
+<div class="grid2"><div>
+<label>角色來源</label><select id="origin"><option value="custom">自創角色</option><option value="kafka">日比野卡夫卡</option><option value="reno">市川雷諾</option><option value="kikoru">四之宮奇可露</option><option value="iharu">古橋伊春</option><option value="haruichi">出雲春樹</option><option value="aoi">神樂木葵</option></select>
+<label>角色名稱</label><input id="name" maxlength="32" placeholder="輸入姓名">
+<label>身分面向</label><select id="role"><option>隊員</option><option>隊長</option><option>特殊適性</option></select>
+<label>入隊動機或背景</label><input id="bio" maxlength="100" placeholder="可留白">
+<label>主武裝（基本配發）</label><select id="weapon"><option value="rifle">標準突擊步槍：威力 6、射程 3、需視線</option><option value="blade">制式近戰刀：威力 6、相鄰</option></select>
+<label>起始技能樣板</label><select id="skillTpl"></select>
+<div id="skillFxWrap"><label>附加效果</label><select id="skillFx"></select></div>
+<label>技能名稱（只改名稱與演出，不改效果）</label><input id="skill" maxlength="24" value="破壞突擊">
+</div><div><div class="row" style="justify-content:space-between"><h3>屬性</h3><b id="points">剩餘 0 點</b></div><div id="attrs"></div><p id="derived" class="muted"></p><p class="muted">四項各為 1，另分配 8 點，初始上限 4。HP／MP 公式和所有戰鬥數值均為待平衡的原型值。</p><label>出擊隊友（最多 3 人）</label><div id="team"></div><p id="teamHint" class="muted"></p></div></div>
+<button id="create" class="primary">建立戰役</button><div class="notice" style="margin-top:12px">存檔只寫入本機瀏覽器，並支援 JSON 匯出／匯入；任務前後自動保留最近 3 份備份。此版本尚無雲端同步。</div>
+</section>
+<section id="game" class="hidden">
+<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">SAGAMIHARA OPERATION</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">AI 交接</button></div></div></div>
+<section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><div class="row"><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
+<section id="train" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">TRAINING</div><h2>訓練</h2><p id="gpLine" class="notice"></p><p class="muted">每項訓練花 1 點成長選擇點，確認後不能退回。未用的點數會保留。</p>
+<div class="box"><h4>屬性訓練</h4><div class="row"><select id="trAttr" style="width:auto"></select><button id="doAttr">提升 +1</button></div><p id="trAttrNote" class="muted"></p></div>
+<div class="box"><h4>學習新技能（最多記住 4 項）</h4><label>樣板</label><select id="trTpl"></select><div id="trFxWrap"><label>附加效果</label><select id="trFx"></select></div><label>技能名稱</label><input id="trName" maxlength="24" placeholder="自訂名稱"><div class="row" style="margin-top:8px"><button id="doLearn">學習</button></div><p id="trLearnNote" class="muted"></p></div>
+<div class="box"><h4>提升已知技能</h4><label>技能</label><select id="trSkill"></select><label>成長分支</label><select id="trBranch"></select><div class="row" style="margin-top:8px"><button id="doUpgrade">升級</button></div><p id="trUpNote" class="muted"></p></div>
+</div><div class="card"><h3>已知技能與出擊裝備（最多 3 項）</h3><div id="skillList"></div><h3>成長紀錄</h3><div id="gpHistory" class="log"></div></div></div></section>
+<section id="prep" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">MISSION BRIEFING</div><h2>相模原｜後方指定區域</h2><p>清理指定區域內的兩隻余獸。回收資料是可選目標；必須攜帶資料撤離才取得點數。</p><ul class="muted"><li>8×6 格街區；瓦礫阻擋移動與視線。</li><li>主要目標：擊倒余獸 A、余獸 B（各算一項子目標）。游蕩余獸不計入目標。</li><li>可選目標：回收資料並帶著撤離（+5 點、+10 經驗）。</li><li>撤離點靠近部署區；撤離不花 AP。</li><li>首次任務不預設倒數計時或增援波次。</li><li>結果：擊倒 2 隻後撤離＝成功；1 隻＝部分成功；0 隻但有回收、救援或擊倒＝有代價撤退；什麼都沒做或全隊倒地＝失敗。</li></ul><p class="notice">結束行動時剩下的 AP 保留到本輪結束，用來閃避（1 AP＋移動 1 AP）、硬接（1 AP）或反擊（2 AP）。</p><h3>出擊編組</h3><p id="ruleNote" class="notice"></p><div id="squadBox"></div><h3>出擊編制</h3><div id="prepParty" class="party"></div><p id="prepNote" class="muted"></p><button id="deploy" class="primary">確認並部署</button></div>
+<div class="card"><h3>總部申請</h3><p id="hqPts" class="notice"></p><div id="shop" class="shop"></div><h3 style="margin-top:14px">裝備配置</h3><p class="muted">任務準備時可換；部署後不能更換。已申請的裝備可在隊員間調換。</p><div id="loadouts"></div></div></div></section>
+<section id="battle" class="screen hidden"><div class="grid2"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
+<div class="row"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
+<div id="modeNote" class="muted" style="margin-top:6px;font-size:13px"></div><div id="reaction" class="notice hidden" style="margin-top:9px"></div><div id="wdBox" class="notice hidden" style="margin-top:9px"></div><div id="hint" class="hint hidden"></div><div class="row" style="margin-top:8px"><button id="replayHints" class="ghost">重看教學提示</button></div></div><div><div class="card"><h3>隊員狀態</h3><div id="battleParty" class="party"></div></div><div class="card"><h3>任務目標</h3><div id="objective"></div><h3>作戰紀錄</h3><div id="combatLog" class="log"></div></div></div></div></section>
+<section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>交給 LunaTalk 的快照</h3><label>玩家自己的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><button id="snapshot" class="primary">產生快照</button> <button id="copySnap">複製</button><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">產生快照並填入聊天輸入框</button> <button id="sendBtn">填入並送出</button><div class="muted" id="autoStat" style="margin-top:6px">自動接收 AI 事件：待命</div></div><textarea id="snapshotOut" readonly></textarea></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（含敘事與 kaiju-events 區塊）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">驗證事件候選</button><label>事件審核政策</label><select id="policy"><option value="auto-low">低影響情報自動套用（可撤銷），其他交我審核</option><option value="review-all">全部交我審核</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>待審核事件</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
+</section></main>
+<script>
+(function(){
+'use strict';
+// ===== 常數 =====
+const SCHEMA='1.3.0',PREFIX='kaiju.tacticalRpg.campaign.v1.',INDEX='kaiju.tacticalRpg.index.v1',BACKUP='kaiju.tacticalRpg.backup.v1.';
+const LABELS={str:'力量',agi:'敏捷',sta:'體能',apt:'戰鬥適性'};
+const XP_TABLE=[0,80,180,300,440,600,780,980,1200,1440];
+const XP_BASE={'成功':40,'部分成功':30,'有代價撤退':20,'失敗':10};
+const CAST={kafka:{name:'日比野卡夫卡',s:[3,2,4,3],w:'rifle',tier:'rookie',lv:2,grow:['sta','str']},reno:{name:'市川雷諾',s:[2,4,2,4],w:'rifle',tier:'rookie',lv:2,grow:['apt','agi']},kikoru:{name:'四之宮奇可露',s:[4,4,2,2],w:'rifle',tier:'rookie',lv:9,grow:['str','agi']},mina:{name:'亞白米娜',s:[4,3,3,2],w:'rifle',tier:'veteran',lv:10,grow:['apt','str']},hoshina:{name:'保科宗四郎',s:[3,4,3,2],w:'blade',tier:'veteran',lv:9,grow:['agi','str']},iharu:{name:'古橋伊春',s:[4,3,2,3],w:'rifle',tier:'rookie',lv:4,grow:['str','agi']},haruichi:{name:'出雲春樹',s:[3,3,3,3],w:'rifle',tier:'rookie',lv:4,grow:['apt','agi']},aoi:{name:'神樂木葵',s:[2,4,3,3],w:'rifle',tier:'rookie',lv:3,grow:['sta','str']},
+ narumi:{name:'鳴海弦',s:[3,4,3,4],w:'rifle',tier:'veteran',lv:10,grow:['apt','agi']},hasegawa:{name:'長谷川榮治',s:[4,3,4,3],w:'rifle',tier:'veteran',lv:8,grow:['sta','str'],est:true},shinonome:{name:'東雲凜',s:[3,4,3,3],w:'rifle',tier:'veteran',lv:7,grow:['agi','str'],est:true},ogata:{name:'緒方重吾',s:[3,3,4,3],w:'rifle',tier:'veteran',lv:6,grow:['sta','apt'],est:true},okonogi:{name:'小此木心美',s:[1,2,2,5],w:'rifle',tier:'support',lv:1,grow:['apt'],est:true}};
+const TIER_LABEL={rookie:'新人',veteran:'資深',support:'後勤'};
+const RULES={training:{label:'新人訓練任務',cap:3,tiers:['rookie'],desc:'限新人編組；出擊等級上限 Lv3，超過的隊員依訓練規定限制出力。玩家角色不受此限。'},standard:{label:'一般任務',cap:6,tiers:['rookie','veteran'],desc:'新人與資深隊員都可編入；出擊等級上限 Lv6。'},elite:{label:'高階任務',cap:10,tiers:['rookie','veteran'],desc:'不限等級的高階任務。'}};
+const MISSION_DEFS={'sagamihara-opening':{title:'相模原後方指定區域',rule:'training'}};
+const FIXED_SQUAD=['kafka','reno','iharu','kikoru'];
+const WEAPONS={rifle:{name:'標準突擊步槍',power:6,range:3,min:1,los:true,cost:0},blade:{name:'制式近戰刀',power:6,range:1,min:1,los:false,cost:0},heavy:{name:'強化重型武器',power:8,range:2,min:1,los:true,cost:10},marksman:{name:'長距離精準武器',power:6,range:5,min:2,los:true,cost:10}};
+const ARMORS={standard:{name:'標準戰鬥服',def:2,cost:0},reinforced:{name:'強化防護服',def:3,cost:15},mobility:{name:'機動防護服',def:1,cost:15}};
+const ACCS={injector:{name:'急救注射器',cost:5,desc:'1 AP：自己或相鄰隊友恢復 10 HP，不能救起倒地者'},'scope-tag':{name:'觀測模組',cost:5,desc:'1 AP：標記一名有視線的敵人，本輪第一次命中 +2 傷害'},anchor:{name:'穩定錨具',cost:5,desc:'被動：抵抗一次擊退／打斷（本任務沒有擊退攻擊）'},capacitor:{name:'高能電容',cost:10,desc:'0 AP 啟動：下一次技能少花 5 MP（最低 5）'},'aim-module':{name:'強化瞄準模組',cost:10,desc:'0 AP 啟動：下一次普通攻擊忽略目標 1 點防禦'}};
+const ITEM_KIND=id=>WEAPONS[id]?'weapon':ARMORS[id]?'armor':ACCS[id]?'accessory':null;
+const ITEM_NAME=id=>(WEAPONS[id]||ARMORS[id]||ACCS[id]||{name:id}).name;
+const SKILL_TPL={
+ 'pierce-shot':{label:'穿甲射擊',kind:'damage',attr:'apt',power:10,impact:2,apCost:2,mpCost:10,range:3,shape:'single',needsLos:true,effects:[null,'break','expose'],desc:'單體、射程 3、需視線'},
+ 'assault-strike':{label:'強襲打擊',kind:'damage',attr:'str',power:10,impact:2,apCost:2,mpCost:10,range:1,shape:'single',needsLos:false,effects:[null,'break'],desc:'單體、相鄰'},
+ 'suppress-shot':{label:'牽制射擊',kind:'damage',attr:'apt',power:8,impact:2,apCost:2,mpCost:10,range:3,shape:'single',needsLos:true,effects:['pin'],desc:'單體、射程 3、需視線，附牽制'},
+ 'sweep':{label:'扇面清場',kind:'area',attr:'str',power:8,impact:2,apCost:2,mpCost:10,range:2,shape:'cross',needsLos:true,effects:[null],desc:'十字範圍，中心在 2 格內且需視線；不傷友軍'},
+ 'field-aid':{label:'戰場急救',kind:'heal',attr:'apt',power:10,impact:0,apCost:2,mpCost:10,range:1,shape:'single',needsLos:false,effects:['heal'],desc:'自己或相鄰隊友恢復 10 HP，不能救起倒地者'}};
+const FX_LABEL={null:'無',break:'破甲（防禦 −1，至目標下次行動結束）',expose:'暴露（下一次命中 +4）',pin:'牽制（下次行動不能移動）',heal:'治療 10'};
+const FX_SHORT={break:'破甲',expose:'暴露',pin:'牽制',heal:'治療'};
+const BRANCH_LABEL={power:'威力 +3（三級 +2）',impact:'衝擊 +2（目前只影響大型敵人）',range:'距離 +1／十字擴大為 3×3',control:'牽制多持續一次行動',efficiency:'MP −5（最低 5）',stable:'首次命中大型目標額外衝擊（目前沒有大型敵人）'};
+const FLAG_REGISTRY={exam_crisis_resolved:{type:'boolean',label:'選拔考場危機已收束',chapter:'sagamihara-opening'},kafka_identity_known_to_player:{type:'boolean',label:'玩家確知卡夫卡能變身',chapter:'sagamihara-opening'},hoshina_recommendation_known:{type:'boolean',label:'玩家得知保科推薦卡夫卡',chapter:'sagamihara-opening'},sagamihara_debrief_status:{type:'enum',values:['pending','praised','reprimanded','questioned'],label:'相模原任務後的簡報評價',chapter:'sagamihara-opening'}};
+const SENSITIVE=['變身','怪獸8號','怪獸 8 號','8號','正體','真實身分','身分','秘密','適合者','識別怪獸兵器','編號兵器','No.'];
+const PAYLOAD_KEYS={'intel.record':['text'],'relationship.setStage':['stage'],'relationship.setFriction':['active'],'story.flag.set':['flagId','value'],'narrative.condition.set':['conditionId','label','active']};
+const KNOWN_IDS=['player','kafka','reno','kikoru','hoshina','mina','iharu','haruichi','aoi','narumi','isao','hikari','hasegawa','shinonome','okonogi','ogata'];
+const W=8,H=6;
+// ===== 工具 =====
+const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(16).slice(2),now=()=>new Date().toISOString();
+const clone=x=>JSON.parse(JSON.stringify(x));
+const apFor=n=>Math.min(8,4+(n>=3)+(n>=6)+(n>=9)+(n>=10));
+const dist=(a,b)=>Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
+const levelFor=xp=>{let l=1;XP_TABLE.forEach((t,i)=>{if(xp>=t)l=i+1});return Math.min(10,l)};
+const nextXpFor=l=>l>=10?null:XP_TABLE[l];
+const skillCap=l=>l>=6?3:l>=3?2:1;
+const baseHp=(s,l)=>80+s.sta*10+(l-1)*8,baseMp=(s,l)=>30+s.apt*10+(l-1)*5;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(s){$('saved').textContent=s;clearTimeout(toast.t);toast.t=setTimeout(()=>{if(save)$('saved').textContent='已自動儲存 · 修訂 '+save.revision},2000)}
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function lsSet(k,v){localStorage.setItem(k,v)}
+let save=null,stats={str:3,agi:3,sta:3,apt:3},mode='move',reaction=null,timer=null,waitingPlayer=false,hintQueue=[],hoverCell=null;
+// ===== 技能 =====
+function makeSkill(tplId,name,effect,source){let t=SKILL_TPL[tplId];return {id:'skill-'+uid().slice(0,8),name:name||t.label,template:tplId,tier:'normal',level:1,attr:t.attr,power:t.power,impact:t.impact,apCost:t.apCost,mpCost:t.mpCost,range:t.range,shape:t.shape,needsLos:t.needsLos,friendlyFire:false,effect:effect===undefined?t.effects[0]:effect,pinTurns:1,stableBonus:0,branch:{level2:null,level3:null},source:source||'creation'}}
+function skillLine(s){let t=SKILL_TPL[s.template]||{label:s.template,kind:'damage'};let parts=[t.label+' Lv'+s.level,s.apCost+' AP／'+s.mpCost+' MP'];if(t.kind==='heal')parts.push('治療 '+s.power);else parts.push('威力 '+s.power);parts.push(s.shape==='single'?(s.range===1?'相鄰':'射程 '+s.range):(s.shape==='area3'?'3×3':'十字')+'、中心 '+s.range+' 格內');if(s.effect&&s.effect!=='heal')parts.push(FX_SHORT[s.effect]+(s.effect==='pin'&&s.pinTurns>1?'×'+s.pinTurns:''));return parts.join(' · ')}
+function branchOptions(s){let t=SKILL_TPL[s.template],opts=[];if(t.kind!=='heal'){opts.push('power','impact')}else opts.push('power');opts.push('range');if(s.level===2&&s.effect==='pin')opts.push('control');opts.push('efficiency');if(t.kind!=='heal')opts.push('stable');if(s.level===2&&s.branch&&s.branch.level2==='impact')opts=opts.filter(o=>o!=='stable');if(s.level===2&&s.branch&&s.branch.level2==='stable')opts=opts.filter(o=>o!=='impact');return opts}
+function applyBranch(s,b){let lv3=s.level===2;switch(b){case 'power':s.power+=lv3?2:3;break;case 'impact':s.impact+=2;break;case 'range':if(s.shape==='cross')s.shape='area3';else s.range+=1;break;case 'control':s.pinTurns=2;break;case 'efficiency':s.mpCost=Math.max(5,s.mpCost-5);break;case 'stable':s.stableBonus=lv3?2:1;break}s.level++;s.branch['level'+s.level]=b}
+// ===== 角色與裝備 =====
+function baseStats(id){let c=CAST[id];return {str:c.s[0],agi:c.s[1],sta:c.s[2],apt:c.s[3]}}
+function statsAtLevel(id,lv){let c=CAST[id],s=baseStats(id),pts=Math.floor(lv/2),i=0,g=0;while(pts>0&&g++<200){if(c.grow.every(k=>s[k]>=10))break;let k=c.grow[i++%c.grow.length];if(s[k]<10){s[k]++;pts--}}return s}
+function statsOf(id){return statsAtLevel(id,CAST[id].lv)}
+function memberLevel(id){let m=save.progression.members[id];return m?m.level:1}
+function ruleOf(key){return RULES[key]||RULES.training}
+function missionDef(){return MISSION_DEFS[save.campaign.chapterId]||MISSION_DEFS['sagamihara-opening']}
+function eligible(r,rule){if(r.id==='player')return {ok:true};let c=CAST[r.id];if(!c)return {ok:false,why:'未登錄角色'};if(!rule.tiers.includes(c.tier))return {ok:false,why:c.tier==='veteran'?'資深隊員不參加'+rule.label:c.tier==='support'?'後勤人員不上前線':'不符合編組'};return {ok:true}}
+function effLevel(r,rule){return r.id==='player'?memberLevel('player'):Math.min(memberLevel(r.id),rule.cap)}
+function squadIds(){return (save.squad||[]).filter(id=>save.roster.some(r=>r.id===id))}
+function squadCheck(rule){let ids=squadIds();if(ids.length>3)return {ok:false,msg:'出擊隊友最多 3 人'};for(let id of ids){let r=save.roster.find(x=>x.id===id),e=eligible(r,rule);if(!e.ok)return {ok:false,msg:r.name+'：'+e.why+'。請到「整備與簡報」調整出擊編組。'}}return {ok:true}}
+function mkMember(id,name,kind,s){let hp=baseHp(s,1),mp=baseMp(s,1),ap=apFor(s.agi);return {id,name,kind,stats:Object.assign({},s),maxHp:hp,hp,maxMp:mp,mp,maxAp:ap,defense:2,injury:null}}
+function mkAlly(id){let c=CAST[id],st=statsOf(id),m=mkMember(id,c.name,'ally',st);m.maxHp=m.hp=baseHp(st,c.lv);m.maxMp=m.mp=baseMp(st,c.lv);m.tier=c.tier;return m}
+function loadout(id){let l=save.equipment.loadouts[id];if(l)return l;return {weapon:id==='player'?'rifle':(CAST[id]?CAST[id].w:'rifle'),armor:'standard',accessory:null}}
+function knownSkills(){return save.playerCharacter.skills||[]}
+function equippedSkills(){let ids=save.playerCharacter.equippedSkillIds||[];return knownSkills().filter(s=>ids.includes(s.id))}
+function rosterPlayer(){return save.roster.find(r=>r.id==='player')}
+function syncPC(){let r=rosterPlayer();if(!r)return;let pc=save.playerCharacter;['name','stats','maxHp','hp','maxMp','mp','maxAp','defense','injury','origin','role'].forEach(k=>{if(r[k]!==undefined)pc[k]=clone(r[k])});pc.id='player';pc.kind='player';pc.level=save.progression.level;let sk=knownSkills()[0];if(sk)pc.customSkill={name:sk.name,apCost:sk.apCost,mpCost:sk.mpCost,power:sk.power}}
+function recalcMember(r){let lv=save.progression.members[r.id]?save.progression.members[r.id].level:1;if(r.kind==='ally'&&CAST[r.id])r.stats=statsAtLevel(r.id,lv);r.maxHp=baseHp(r.stats,lv);r.maxMp=baseMp(r.stats,lv);r.maxAp=apFor(r.stats.agi);r.defense=ARMORS[loadout(r.id).armor].def}
+function injuryText(inj){if(!inj)return '無傷勢';return {light:'輕傷：下次出擊以 80% HP 開始',heavy:'重傷：下次出擊最大 HP −25%','heavy-recovering':'重傷恢復中：下次出擊以 80% HP 開始','limb-leg':'腿部肢殘：下次出擊敏捷 −2、AP 上限 −1','limb-arm':'手部肢殘：下次出擊造成傷害 ×0.8'}[inj.type]||inj.label}
+function ownedCount(id){return save.equipment.owned.filter(x=>x===id).length}
+function assignedCount(id,exceptMember){let n=0;Object.keys(save.equipment.loadouts).forEach(m=>{if(m===exceptMember)return;let l=save.equipment.loadouts[m];if(l.weapon===id||l.armor===id||l.accessory===id)n++});return n}
+function isBase(id){return id==='rifle'||id==='blade'||id==='standard'}
+// ===== 建立戰役 =====
+function fillTplSelect(sel){sel.innerHTML=Object.keys(SKILL_TPL).map(k=>'<option value="'+k+'">'+SKILL_TPL[k].label+'：'+SKILL_TPL[k].desc+'</option>').join('')}
+function fillFxSelect(tplSel,fxSel,wrap){let t=SKILL_TPL[tplSel.value];fxSel.innerHTML=t.effects.map(f=>'<option value="'+(f||'')+'">'+FX_LABEL[f]+'</option>').join('');wrap.classList.toggle('hidden',t.effects.length<2)}
+function renderStats(){let left=8;Object.keys(stats).forEach(k=>left-=stats[k]-1);let custom=$('origin').value==='custom';$('points').textContent=custom?'剩餘 '+left+' 點':'既有角色原型基準';$('attrs').innerHTML=Object.keys(stats).map(k=>'<div class="attr"><b>'+LABELS[k]+'</b><button data-k="'+k+'" data-d="-1">−</button><span>'+stats[k]+'</span><button data-k="'+k+'" data-d="1">＋</button></div>').join('');$('attrs').querySelectorAll('button').forEach(b=>b.disabled=!custom);$('derived').textContent='HP '+baseHp(stats,1)+' · MP '+baseMp(stats,1)+' · 每回合 AP '+apFor(stats.agi)+'（敏捷 3／6／9／10 各 +1）'}
+function squadFor(origin){return FIXED_SQUAD.filter(k=>k!==origin).slice(0,3)}
+function renderTeam(){const origin=$('origin').value,role=$('role').value,defaults=squadFor(origin);$('team').innerHTML=Object.keys(CAST).filter(k=>k!==origin&&CAST[k].tier!=='support').map(k=>{let c=CAST[k],ok=RULES.training.tiers.includes(c.tier);return '<label class="check"><input type="checkbox" value="'+k+'" '+(defaults.includes(k)?'checked ':'')+((role!=='隊長'||!ok)?'disabled':'')+'>'+c.name+(ok?'':'（資深，訓練任務不出擊）')+'</label>'}).join('');$('teamHint').textContent=role==='隊長'?'首次任務是新人訓練任務，只能從新人中選最多 3 位；資深隊員已在名冊，之後的一般任務才能編入。':'固定小隊名單（新人）；你選的既有角色不會再以隊友身分出現。'}
+function newCampaign(){let origin=$('origin').value,name=$('name').value.trim()||'新隊員',role=$('role').value,left=8;Object.keys(stats).forEach(k=>left-=stats[k]-1);if(origin==='custom'&&left){alert('請分配完 8 點屬性');return}
+ let p=mkMember('player',origin==='custom'?name:CAST[origin].name,'player',stats);p.origin=origin;p.role=role;
+ let skill=makeSkill($('skillTpl').value,$('skill').value.trim(),$('skillFx').value||null,'creation');
+ let ids=role==='隊長'?Array.from($('team').querySelectorAll('input:checked')).map(x=>x.value).slice(0,3):squadFor(origin);
+ let pool=Object.keys(CAST).filter(k=>k!==origin&&CAST[k].tier!=='support'),allyIds=ids.concat(pool.filter(k=>!ids.includes(k)));
+ let roster=[p].concat(allyIds.map(mkAlly));
+ let loadouts={player:{weapon:origin==='custom'?$('weapon').value:CAST[origin].w,armor:'standard',accessory:null}};allyIds.forEach(id=>loadouts[id]={weapon:CAST[id].w,armor:'standard',accessory:null});
+ let members={};roster.forEach(r=>{let lv=r.id==='player'?1:CAST[r.id].lv;members[r.id]={level:lv,xp:XP_TABLE[lv-1]}});
+ let t=now();save={schemaVersion:SCHEMA,campaignId:uid(),revision:0,createdAt:t,savedAt:t,campaign:{name:p.name+' 的防衛隊戰役',chapterId:'sagamihara-opening',phase:'mission_prep',missionCount:0},
+  playerCharacter:Object.assign(clone(p),{description:origin==='custom'?$('bio').value.trim():'選擇的既有角色，使用原型暫定戰鬥屬性',skills:[skill],equippedSkillIds:[skill.id],customSkill:{name:skill.name,apCost:skill.apCost,mpCost:skill.mpCost,power:skill.power}}),
+  roster:roster,squad:ids.slice(),progression:{level:1,xp:0,nextXp:XP_TABLE[1],recoveryPoints:0,members:members,growthPoints:{available:0,history:[]},awarded:{chapters:[],milestones:[]}},
+  equipment:{standardLoadout:true,catalogVersion:1,owned:[],loadouts:loadouts},currentMission:null,
+  narrativeState:{chapterId:'sagamihara-opening',locationId:'briefing',timeMarker:'相模原作戰前',relationships:{},flagRegistry:clone(FLAG_REGISTRY),storyFlags:[],flagValues:{},allowedFlagIds:Object.keys(FLAG_REGISTRY),intel:[],nonCombatConditions:[]},
+  snapshotRegistry:[],eventQueue:[],eventHistory:[],missionHistory:[],settings:{reviewPolicy:'auto-low',sensitiveTerms:SENSITIVE.slice(),tutorialSeen:[]},migrationLog:[]};
+ roster.slice(1).forEach(a=>save.narrativeState.relationships[a.id]={stage:'普通',friction:false});
+ persist(true);enterGame('campaign')}
+// ===== 存檔、備份、遷移 =====
+function persist(bump){if(!save)return;if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
+ try{lsSet(PREFIX+save.campaignId,JSON.stringify(save));let list=JSON.parse(lsGet(INDEX)||'[]').filter(x=>x.campaignId!==save.campaignId);list.unshift({campaignId:save.campaignId,name:save.campaign.name,savedAt:save.savedAt});lsSet(INDEX,JSON.stringify(list.slice(0,20)));$('saved').textContent='已自動儲存 · 修訂 '+save.revision;$('export').disabled=false}catch(e){$('saved').textContent='儲存失敗，請匯出 JSON'}}
+function backupNow(reason){if(!save)return;try{let cur=lsGet(PREFIX+save.campaignId);if(!cur)return;let list=JSON.parse(lsGet(BACKUP+save.campaignId)||'[]');let d=JSON.parse(cur);list.unshift({at:now(),reason,revision:d.revision,schemaVersion:d.schemaVersion,data:cur});lsSet(BACKUP+save.campaignId,JSON.stringify(list.slice(0,3)))}catch(e){}}
+function verParts(v){let m=/^(\d+)\.(\d+)\.(\d+)$/.exec(String(v||''));return m?[+m[1],+m[2],+m[3]]:null}
+function migrate10to11(d,notes){d=clone(d);let rename={ao:'haruichi',haru:'aoi'},renamed=[];
+ d.roster.forEach(r=>{if(rename[r.id]){renamed.push(r.id+'→'+rename[r.id]);r.id=rename[r.id]}if(!r.maxAp)r.maxAp=apFor(r.stats.agi);if(r.defense==null)r.defense=2});
+ let rel=d.narrativeState.relationships||{};Object.keys(rename).forEach(o=>{if(rel[o]){rel[rename[o]]=rel[o];delete rel[o]}});
+ (d.eventQueue||[]).concat(d.eventHistory||[]).forEach(e=>{if(e.targetId&&rename[e.targetId])e.targetId=rename[e.targetId]});
+ if(renamed.length)notes.push('隊友識別碼改名：'+renamed.join('、'));
+ let pr=d.roster.find(r=>r.id==='player'),pc=d.playerCharacter||{};let cs=pc.customSkill||{name:'特殊攻擊'};
+ let p=d.progression||{};let xp=p.xp||0,lv=levelFor(xp);let members={};d.roster.forEach(r=>members[r.id]={level:r.id==='player'?lv:1,xp:r.id==='player'?xp:0});
+ d.roster.forEach(r=>{let l=members[r.id].level;r.maxHp=baseHp(r.stats,l);r.maxMp=baseMp(r.stats,l);r.hp=Math.min(r.hp==null?r.maxHp:r.hp,r.maxHp);r.mp=Math.min(r.mp==null?r.maxMp:r.mp,r.maxMp)});
+ d.progression={level:lv,xp:xp,nextXp:nextXpFor(lv),recoveryPoints:p.recoveryPoints||0,members:members,growthPoints:{available:0,history:[]},awarded:{chapters:[],milestones:[]}};
+ notes.push('依新經驗門檻重算等級：Lv'+(p.level||1)+' → Lv'+lv+'（經驗 '+xp+'）；成長選擇點不追溯發放。');
+ let skill=makeSkill('pierce-shot',cs.name||'特殊攻擊',null,'creation');skill.id='skill-1';
+ d.playerCharacter=Object.assign({},pc,clone(pr),{description:pc.description||'',skills:[skill],customSkill:{name:skill.name,apCost:2,mpCost:10,power:10}});
+ notes.push('玩家角色資料以名冊為準重新同步；技能「'+skill.name+'」登記為穿甲射擊樣板（射程 3、需視線）。');
+ let lo={};d.roster.forEach(r=>lo[r.id]={weapon:r.id==='hoshina'?'blade':'rifle',armor:'standard',accessory:null});
+ d.equipment={standardLoadout:true,catalogVersion:1,owned:[],loadouts:lo};
+ if(d.currentMission&&d.currentMission.phase!=='battle')d.currentMission=null;
+ let ns=d.narrativeState;let flags=(ns.storyFlags||[]).map(f=>f==='kafka_identity_known'?'kafka_identity_known_to_player':f).filter(f=>FLAG_REGISTRY[f]);
+ ns.flagRegistry=clone(FLAG_REGISTRY);ns.storyFlags=flags;ns.flagValues={};flags.forEach(f=>ns.flagValues[f]=true);ns.allowedFlagIds=Object.keys(FLAG_REGISTRY);
+ ns.intel=(ns.intel||[]).map(i=>Object.assign({knownBy:[],sourceEventId:null,autoApplied:false},i));ns.nonCombatConditions=ns.nonCombatConditions||[];
+ d.settings={reviewPolicy:'auto-low',sensitiveTerms:SENSITIVE.slice(),tutorialSeen:[]};
+ d.missionHistory=(d.missionHistory||[]).map(h=>Object.assign({missionId:null,title:'相模原後方指定區域',chapterId:'sagamihara-opening'},h));
+ notes.push('請檢查屬性：1.0 原型的腿傷錯誤可能已永久降低名冊敏捷，遷移無法判斷原值。');
+ d.migrationLog=(d.migrationLog||[]).concat([{from:'1.0.0',to:'1.1.0',at:now(),notes:notes.slice()}]);d.schemaVersion='1.1.0';return d}
+function migrate11to12(d,notes){d=clone(d);let pc=d.playerCharacter;pc.skills=(pc.skills||[]).map(s=>Object.assign({pinTurns:1,stableBonus:0},s,{branch:s.branch&&typeof s.branch==='object'?Object.assign({level2:null,level3:null},s.branch):{level2:null,level3:null}}));
+ if(!Array.isArray(pc.equippedSkillIds))pc.equippedSkillIds=pc.skills.slice(0,3).map(s=>s.id);
+ let n=['新增技能出擊欄位（預設帶上前 3 項技能）'];notes.push(n[0]);d.migrationLog=(d.migrationLog||[]).concat([{from:'1.1.0',to:'1.2.0',at:now(),notes:n}]);d.schemaVersion='1.2.0';return d}
+function migrate12to13(d,notes){d=clone(d);let n=[],pg=d.progression,have=new Set(d.roster.map(r=>r.id)),origin=(d.roster.find(r=>r.id==='player')||{}).origin;
+ d.equipment=d.equipment||{loadouts:{}};d.equipment.loadouts=d.equipment.loadouts||{};d.narrativeState.relationships=d.narrativeState.relationships||{};
+ let added=[],raised=[];
+ d.roster.forEach(r=>{if(r.id==='player'||!CAST[r.id])return;let c=CAST[r.id],mem=pg.members[r.id]||(pg.members[r.id]={level:1,xp:0});r.tier=c.tier;
+  if(mem.level<c.lv){raised.push(r.name+' Lv'+mem.level+'→Lv'+c.lv);mem.level=c.lv;mem.xp=Math.max(mem.xp,XP_TABLE[c.lv-1])}
+  r.stats=statsAtLevel(r.id,mem.level);r.maxHp=baseHp(r.stats,mem.level);r.maxMp=baseMp(r.stats,mem.level);r.maxAp=apFor(r.stats.agi);r.hp=Math.min(r.hp==null?r.maxHp:r.hp,r.maxHp);r.mp=Math.min(r.mp==null?r.maxMp:r.mp,r.maxMp)});
+ Object.keys(CAST).forEach(k=>{if(CAST[k].tier==='support'||k===origin||have.has(k))return;let a=mkAlly(k);d.roster.push(a);pg.members[k]={level:CAST[k].lv,xp:XP_TABLE[CAST[k].lv-1]};d.equipment.loadouts[k]={weapon:CAST[k].w,armor:'standard',accessory:null};if(!d.narrativeState.relationships[k])d.narrativeState.relationships[k]={stage:'普通',friction:false};added.push(CAST[k].name)});
+ let cur=d.roster.filter(r=>r.kind==='ally'&&CAST[r.id]&&CAST[r.id].tier==='rookie').map(r=>r.id),squad=[];
+ FIXED_SQUAD.concat(cur).forEach(id=>{if(squad.length<3&&cur.includes(id)&&!squad.includes(id))squad.push(id)});
+ d.squad=squad;
+ let old=d.roster.filter(r=>r.kind==='ally'&&!squad.includes(r.id)&&CAST[r.id]&&CAST[r.id].tier!=='rookie').length;
+ if(added.length)n.push('名冊補入其他隊員：'+added.join('、'));if(raised.length)n.push('依原作戰力調整等級：'+raised.join('、'));
+ n.push('新增出擊編組（新人訓練任務限新人，最多 3 人）：'+squad.map(id=>CAST[id].name).join('、')+(old?'；資深隊員保留在名冊，之後的一般任務才能編入':''));
+ n.forEach(x=>notes.push(x));d.migrationLog=(d.migrationLog||[]).concat([{from:'1.2.0',to:'1.3.0',at:now(),notes:n}]);d.schemaVersion='1.3.0';return d}
+function migrate(d){let v=verParts(d.schemaVersion);if(!v)throw Error('缺少或無法辨識 schemaVersion');if(v[0]!==1)throw Error('不支援的主版本 '+d.schemaVersion);if(v[1]>3)throw Error('存檔版本 '+d.schemaVersion+' 比此面板新，請使用較新版面板');
+ if(!d.campaignId||!Array.isArray(d.roster)||!d.roster.some(r=>r.id==='player'))throw Error('缺少 campaignId 或名冊');
+ let notes=[];if(v[1]===0)d=migrate10to11(d,notes);if(verParts(d.schemaVersion)[1]===1)d=migrate11to12(d,notes);if(verParts(d.schemaVersion)[1]===2)d=migrate12to13(d,notes);return {data:d,notes}}
+function adopt(d,label){let r,from=d.schemaVersion;try{r=migrate(d)}catch(e){alert(label+'失敗：'+e.message);return false}
+ if(r.notes.length&&!confirm('此存檔為 '+from+'，將遷移為 '+SCHEMA+'：\n\n・'+r.notes.join('\n・')+'\n\n確認後先備份原檔再寫入。'))return false;
+ stopTimers();save=r.data;(save.roster||[]).forEach(a=>{if(a.kind==='ally'&&CAST[a.id]&&CAST[a.id].name&&a.name!==CAST[a.id].name)a.name=CAST[a.id].name});if(r.notes.length)backupNow('遷移前（'+from+'）');persist(false);let m=save.currentMission;enterGame(m&&m.phase==='battle'?'battle':'campaign');resumeBattle();return true}
+function load(){let list=JSON.parse(lsGet(INDEX)||'[]');if(!list.length){alert('找不到本機戰役');return}let n=prompt(list.map((x,i)=>(i+1)+'. '+x.name+'（'+x.savedAt.slice(0,16).replace('T',' ')+'）').join('\n'),'1');if(!n)return;let it=list[+n-1];if(!it){alert('沒有這個編號');return}let raw=lsGet(PREFIX+it.campaignId);if(!raw){alert('找不到存檔內容');return}try{adopt(JSON.parse(raw),'載入')}catch(e){alert('載入失敗：'+e.message)}}
+function restoreBackup(){if(!save){alert('請先載入戰役');return}let list=JSON.parse(lsGet(BACKUP+save.campaignId)||'[]');if(!list.length){alert('這個戰役還沒有備份');return}let n=prompt('還原哪一份備份？（目前狀態會先另存一份）\n'+list.map((b,i)=>(i+1)+'. '+b.at.slice(0,16).replace('T',' ')+' · '+b.reason+' · 修訂 '+b.revision).join('\n'),'1');if(!n)return;let b=list[+n-1];if(!b)return;let data=JSON.parse(b.data);backupNow('還原前');stopTimers();let r;try{r=migrate(data)}catch(e){alert('還原失敗：'+e.message);return}save=r.data;persist(false);let m=save.currentMission;enterGame(m&&m.phase==='battle'?'battle':'campaign');resumeBattle();toast('已還原備份')}
+function exportJson(){if(!save)return;let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(save,null,2)],{type:'application/json'}));a.download='kaiju-campaign-'+save.campaignId+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function importJson(f){let r=new FileReader();r.onload=()=>{let d;try{d=JSON.parse(r.result)}catch(e){alert('匯入失敗：不是有效的 JSON');return}if(!d||!d.campaignId){alert('匯入失敗：缺少 campaignId');return}
+ let exists=!!lsGet(PREFIX+d.campaignId);if(exists&&!confirm('本機已有同一戰役（'+(d.campaign&&d.campaign.name||d.campaignId)+'），覆蓋本機版本？\n本機版本會先存成備份。'))return;
+ if(exists){let keep=save;save=JSON.parse(lsGet(PREFIX+d.campaignId));backupNow('匯入覆蓋前');save=keep}
+ adopt(d,'匯入')};r.readAsText(f)}
+// ===== 畫面 =====
+function enterGame(tab){$('setup').classList.add('hidden');$('game').classList.remove('hidden');$('policy').value=save.settings.reviewPolicy;showTab(tab)}
+function showTab(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('hidden',x.id!==id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(save)render()}
+function memberCard(a,battle){let maxAp=a.maxAp||1,cur=Number.isFinite(a.ap)?a.ap:maxAp,lo=battle?{weapon:a.weapon,armor:a.armor,accessory:a.accessory}:loadout(a.id),lv=save.progression.members[a.id]?save.progression.members[a.id].level:1,tag=CAST[a.id]&&a.kind==='ally'?TIER_LABEL[CAST[a.id].tier]+' ':'',lvt='Lv'+lv+(battle&&a.effLv&&a.effLv<lv?'→'+a.effLv:'');
+ return '<div class="member'+(a.downed?' down':'')+'"><b>'+esc(a.name)+'</b> <small class="muted">'+tag+lvt+'</small><div class="bar"><i style="width:'+Math.max(0,Math.min(100,a.hp/a.maxHp*100))+'%"></i></div><small>HP '+a.hp+'/'+a.maxHp+' · MP '+a.mp+'/'+a.maxMp+(battle?' · AP '+cur+'/'+maxAp:' · AP '+maxAp)+'<br>'+esc(WEAPONS[lo.weapon].name)+' · 防禦 '+(battle?a.defense:ARMORS[lo.armor].def)+(lo.accessory?'<br>'+esc(ACCS[lo.accessory].name)+(battle&&a.accUsed?'（已用）':''):'')+(a.guard?'<br>守勢中':'')+(a.downed?'<br><b style="color:var(--red)">倒地</b>':'')+(!battle&&a.injury?'<br><span style="color:var(--gold)">'+esc(injuryText(a.injury))+'</span>':'')+'</small></div>'}
+function render(){if(!save)return;let p=rosterPlayer(),pg=save.progression,lo=loadout('player');$('title').textContent=save.campaign.name;$('pcname').textContent=p.name+' · '+save.playerCharacter.role;
+ $('stats').innerHTML='<div class="stat">HP<b>'+p.maxHp+'</b></div><div class="stat">MP<b>'+p.maxMp+'</b></div><div class="stat">AP／回合<b>'+p.maxAp+'</b></div><div class="stat">等級<b>Lv'+pg.level+'</b><small class="muted">經驗 '+pg.xp+(pg.nextXp?'／'+pg.nextXp:'（滿級）')+'</small></div>'+Object.keys(LABELS).map(k=>'<div class="stat">'+LABELS[k]+'<b>'+p.stats[k]+'</b></div>').join('');
+ $('bioText').innerHTML=esc(save.playerCharacter.description||'')+'<br>主武裝：'+esc(WEAPONS[lo.weapon].name)+'　防護：'+esc(ARMORS[lo.armor].name)+(lo.accessory?'　輔助：'+esc(ACCS[lo.accessory].name):'')+'<br>出擊技能：'+(equippedSkills().map(s=>esc(s.name)+'（'+esc(skillLine(s))+'）').join('、')||'無');
+ $('injury').textContent='傷勢：'+injuryText(p.injury);
+ $('growth').textContent='成長選擇點：'+pg.growthPoints.available+(pg.growthPoints.available?'，可到「訓練」使用':'');
+ $('party').innerHTML=save.roster.map(a=>memberCard(a,false)).join('');$('prepParty').innerHTML=save.roster.filter(a=>a.id==='player'||squadIds().includes(a.id)).map(a=>memberCard(a,false)).join('');renderSquad();
+ $('prepNote').textContent='玩家只操作自己的角色。'+(pg.awarded.chapters.includes('sagamihara-opening')?' 此任務已完成過：可以再次出擊演練，經驗照常結算，但篇章成長點不再發放。':'');
+ $('score').textContent='回收點數：'+pg.recoveryPoints;
+ let last=save.missionHistory[save.missionHistory.length-1];
+ $('debrief').innerHTML=last?'<div class="eyebrow">最近任務結算</div><div class="result">'+esc(last.result)+'</div><p class="muted">'+esc(last.summary)+'</p><div class="kv"><span>主要目標</span><span>'+((last.objectives&&last.objectives.subObjectives)||[]).map(o=>(o.done?'✅':'⬜')+esc(o.label)).join('　')+'</span><span>可選目標</span><span>'+((last.objectives&&last.objectives.optional)||[]).map(o=>(o.done?'✅':'⬜')+esc(o.label)).join('　')+'</span><span>經驗</span><span>'+Object.keys(last.xpByMember||{}).map(k=>esc(nameOf(k))+' +'+last.xpByMember[k]).join('、')+'</span><span>回收點數</span><span>+'+last.recoveryPoints+'</span><span>傷勢</span><span>'+(Object.keys(last.injuries||{}).filter(k=>last.injuries[k]).map(k=>esc(nameOf(k))+'：'+esc(injuryText({type:last.injuries[k]}))).join('；')||'無')+'</span>'+((last.growthAwards||[]).length?'<span>成長點</span><span>'+last.growthAwards.map(g=>esc(g.label)).join('、')+'</span>':'')+'</div><hr style="border-color:#294251">':'';
+ $('history').innerHTML=save.missionHistory.length?save.missionHistory.slice().reverse().map(m=>'<p>'+esc(m.result)+' · '+esc(m.summary)+' · 經驗 +'+m.xp+'</p>').join(''):'<p class="muted">尚無任務記錄。</p>';
+ renderTrain();renderPrep();renderBattle();renderQueue()}
+function nameOf(id){let r=save.roster.find(x=>x.id===id);return r?r.name:(CAST[id]?CAST[id].name:id)}
+// ===== 訓練 =====
+function canTrain(){return save&&!(save.currentMission&&save.currentMission.phase==='battle')}
+function renderTrain(){let gp=save.progression.growthPoints.available,lv=save.progression.level,p=rosterPlayer(),busy=!canTrain(),cap=skillCap(lv),ks=knownSkills();
+ $('gpLine').textContent='成長選擇點：'+gp+'　角色等級 Lv'+lv+'（技能最高可到 '+cap+' 級）'+(busy?'　※ 戰鬥中不能訓練':'');
+ let keepAttr=$('trAttr').value;$('trAttr').innerHTML=Object.keys(LABELS).map(k=>'<option value="'+k+'" '+(p.stats[k]>=10?'disabled':'')+'>'+LABELS[k]+' '+p.stats[k]+' → '+Math.min(10,p.stats[k]+1)+'</option>').join('');if(keepAttr)$('trAttr').value=keepAttr;
+ let k=$('trAttr').value,cur=p.stats[k],nextAp=k==='agi'&&apFor(cur+1)>apFor(cur);$('trAttrNote').textContent={str:'力量：普通攻擊與力量型技能的傷害。',agi:'敏捷：行動順序；3／6／9／10 時 AP +1。',sta:'體能：最大 HP +10。',apt:'戰鬥適性：最大 MP +10，戰鬥適性型技能的傷害。'}[k]+(nextAp?' 這次提升會讓每回合 AP +1。':'');
+ $('doAttr').disabled=busy||gp<1||cur>=10;
+ if(!$('trTpl').options.length){fillTplSelect($('trTpl'));fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'))}
+ $('doLearn').disabled=busy||gp<1||ks.length>=4;$('trLearnNote').textContent=ks.length>=4?'已記住 4 項技能，不能再學新的。':'目前記住 '+ks.length+'／4 項。高階技能需角色 Lv6 並有劇情解鎖，尚未開放。';
+ let keepSk=$('trSkill').value;$('trSkill').innerHTML=ks.map(s=>'<option value="'+s.id+'" '+(s.level>=Math.min(3,cap)?'disabled':'')+'>'+esc(s.name)+'（Lv'+s.level+'）</option>').join('');if(keepSk)$('trSkill').value=keepSk;
+ let sel=ks.find(s=>s.id===$('trSkill').value&&s.level<cap);if(!sel){let firstOk=ks.find(s=>s.level<cap);if(firstOk){$('trSkill').value=firstOk.id;sel=firstOk}}
+ if(!sel){$('trSkill').insertAdjacentHTML('afterbegin','<option value="" selected>（目前沒有可升級的技能）</option>')}
+ let keepBr=$('trBranch').value;$('trBranch').innerHTML=sel?branchOptions(sel).map(b=>'<option value="'+b+'">'+BRANCH_LABEL[b]+'</option>').join(''):'';if(keepBr&&sel&&branchOptions(sel).includes(keepBr))$('trBranch').value=keepBr;
+ $('doUpgrade').disabled=busy||gp<1||!sel;$('trUpNote').textContent=sel?'升到 Lv'+(sel.level+1)+' 後：選擇的分支立即生效，AP 消耗不變。':(cap<2?'角色 Lv3 才能把技能升到 2 級。':'所有技能都已達目前等級上限。');
+ let eq=save.playerCharacter.equippedSkillIds||[];
+ $('skillList').innerHTML=ks.map(s=>'<div class="skill"><label class="check" style="margin:0 0 4px"><input type="checkbox" data-eq="'+s.id+'" '+(eq.includes(s.id)?'checked':'')+(busy?' disabled':'')+'> 出擊時帶上</label> <b>'+esc(s.name)+'</b><br><span class="muted">'+esc(skillLine(s))+(s.branch&&(s.branch.level2||s.branch.level3)?' · 分支：'+[s.branch.level2,s.branch.level3].filter(Boolean).map(b=>BRANCH_LABEL[b].split('（')[0]).join('、'):'')+'</span></div>').join('');
+ $('skillList').querySelectorAll('[data-eq]').forEach(c=>c.onchange=()=>{let ids=Array.from($('skillList').querySelectorAll('[data-eq]:checked')).map(x=>x.dataset.eq);if(ids.length>3){c.checked=false;alert('出擊最多帶 3 項技能');return}save.playerCharacter.equippedSkillIds=ids;persist(true);render()});
+ let hist=save.progression.growthPoints.history.slice().reverse();$('gpHistory').innerHTML=hist.length?hist.map(h=>'<p>'+(h.amount>0?'+':'')+h.amount+' · '+esc(h.label)+' <span class="muted">'+h.at.slice(0,10)+'</span></p>').join(''):'<p class="muted">尚無紀錄。</p>'}
+function spendPoint(label,choice){let g=save.progression.growthPoints;g.available--;g.history.push({source:'spent',amount:-1,label,choice,at:now()})}
+function trainAttr(){if(!canTrain()||save.progression.growthPoints.available<1)return;let k=$('trAttr').value,p=rosterPlayer();if(p.stats[k]>=10)return;if(!confirm('把'+LABELS[k]+'從 '+p.stats[k]+' 提升到 '+(p.stats[k]+1)+'？確認後不能退回。'))return;p.stats[k]++;recalcMember(p);spendPoint(LABELS[k]+' +1（'+(p.stats[k]-1)+'→'+p.stats[k]+'）',{kind:'attribute',attr:k});persist(true);render();toast(LABELS[k]+' 提升到 '+p.stats[k])}
+function trainLearn(){if(!canTrain()||save.progression.growthPoints.available<1)return;let ks=knownSkills();if(ks.length>=4)return;let tpl=$('trTpl').value,t=SKILL_TPL[tpl],name=$('trName').value.trim()||t.label,fx=$('trFx').value||null;if(t.effects.length===1)fx=t.effects[0];
+ if(!confirm('學習「'+name+'」（'+t.label+'，'+FX_LABEL[fx]+'）？'))return;let s=makeSkill(tpl,name,fx,'training');ks.push(s);let eq=save.playerCharacter.equippedSkillIds;if(eq.length<3)eq.push(s.id);spendPoint('學會「'+name+'」（'+t.label+'）',{kind:'learn',template:tpl,skillId:s.id});$('trName').value='';persist(true);render();toast('學會 '+name)}
+function trainUpgrade(){if(!canTrain()||save.progression.growthPoints.available<1)return;let s=knownSkills().find(x=>x.id===$('trSkill').value),b=$('trBranch').value;if(!s||!b)return;if(s.level>=skillCap(save.progression.level)){alert('角色等級不足');return}if(!branchOptions(s).includes(b))return;
+ if(!confirm('把「'+s.name+'」升到 Lv'+(s.level+1)+'，分支：'+BRANCH_LABEL[b]+'？'))return;applyBranch(s,b);spendPoint('「'+s.name+'」升到 Lv'+s.level+'（'+BRANCH_LABEL[b].split('（')[0]+'）',{kind:'upgrade',skillId:s.id,branch:b});persist(true);render();toast(s.name+' 升到 Lv'+s.level)}
+// ===== 總部申請與裝備 =====
+function renderSquad(){let rule=ruleOf(missionDef().rule),cap=rosterPlayer().role==='隊長',busy=!canTrain(),ids=squadIds();$('ruleNote').textContent=rule.label+'：'+rule.desc;
+ $('squadBox').innerHTML=save.roster.filter(r=>r.id!=='player').map(r=>{let e=eligible(r,rule),on=ids.includes(r.id),lv=memberLevel(r.id),ev=Math.min(lv,rule.cap),dis=busy||!cap||(!on&&(!e.ok||ids.length>=3));
+  return '<label class="check sq'+(e.ok?'':' muted')+'"><input type="checkbox" data-sq="'+r.id+'" '+(on?'checked ':'')+(dis?'disabled':'')+'> '+esc(r.name)+' <small class="muted">'+TIER_LABEL[CAST[r.id].tier]+' Lv'+lv+(e.ok?(ev<lv?'→出力限制 Lv'+ev:''):'　'+esc(e.why))+'</small></label>'}).join('')+(cap?'':'<p class="muted">你的身分面向不是「隊長」，出擊編組由隊上固定安排。</p>');
+ $('squadBox').querySelectorAll('[data-sq]').forEach(b=>b.onchange=()=>{let id=b.dataset.sq,cur=squadIds();if(b.checked){if(cur.length>=3){render();return}cur.push(id)}else cur=cur.filter(x=>x!==id);save.squad=save.roster.filter(r=>cur.includes(r.id)).map(r=>r.id);persist(true);render()})}
+function renderPrep(){let pts=save.progression.recoveryPoints,busy=!canTrain();$('hqPts').textContent='回收點數：'+pts+(busy?'　※ 戰鬥中不能申請或換裝':'');
+ let items=[...Object.keys(WEAPONS).filter(k=>WEAPONS[k].cost),...Object.keys(ARMORS).filter(k=>ARMORS[k].cost),...Object.keys(ACCS)];
+ let desc=id=>WEAPONS[id]?'普通攻擊威力 '+WEAPONS[id].power+'、射程 '+(WEAPONS[id].min>1?WEAPONS[id].min+'–':'')+WEAPONS[id].range:ARMORS[id]?'防禦 '+ARMORS[id].def+(id==='mobility'?'；每場第一次閃避免付移動 AP':''):ACCS[id].desc;
+ $('shop').innerHTML=items.map(id=>{let c=(WEAPONS[id]||ARMORS[id]||ACCS[id]).cost;return '<div><b>'+esc(ITEM_NAME(id))+'</b><br><small class="muted">'+esc(desc(id))+'</small></div><small>持有 '+ownedCount(id)+'</small><button class="mini" data-buy="'+id+'" '+(busy||pts<c?'disabled':'')+'>申請 '+c+' 點</button>'}).join('');
+ $('shop').querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>buy(b.dataset.buy));
+ let opt=(kind,member,cur)=>{let ids=kind==='weapon'?Object.keys(WEAPONS):kind==='armor'?Object.keys(ARMORS):[null].concat(Object.keys(ACCS));return ids.filter(id=>id===null||isBase(id)||ownedCount(id)>0).map(id=>{let free=id===null||isBase(id)?Infinity:ownedCount(id)-assignedCount(id,member);return '<option value="'+(id||'')+'" '+(id===cur?'selected':'')+(free<=0&&id!==cur?' disabled':'')+'>'+(id?esc(ITEM_NAME(id))+(free!==Infinity?'（可用 '+Math.max(0,free)+'）':''):'無輔助裝備')+'</option>'}).join('')};
+ $('loadouts').innerHTML='<div class="lo muted"><span>隊員</span><span>主武裝</span><span>防護服</span><span>輔助裝備</span></div>'+save.roster.map(r=>{let l=loadout(r.id);return '<div class="lo"><b>'+esc(r.name)+'</b><select data-lo="'+r.id+'" data-k="weapon" '+(busy?'disabled':'')+'>'+opt('weapon',r.id,l.weapon)+'</select><select data-lo="'+r.id+'" data-k="armor" '+(busy?'disabled':'')+'>'+opt('armor',r.id,l.armor)+'</select><select data-lo="'+r.id+'" data-k="accessory" '+(busy?'disabled':'')+'>'+opt('accessory',r.id,l.accessory)+'</select></div>'}).join('');
+ $('loadouts').querySelectorAll('[data-lo]').forEach(s=>s.onchange=()=>setLoadout(s.dataset.lo,s.dataset.k,s.value||null))}
+function buy(id){if(!canTrain())return;let c=(WEAPONS[id]||ARMORS[id]||ACCS[id]).cost;if(save.progression.recoveryPoints<c){toast('回收點數不足');return}if(!confirm('花 '+c+' 點申請「'+ITEM_NAME(id)+'」？'))return;save.progression.recoveryPoints-=c;save.equipment.owned.push(id);persist(true);render();toast('已申請 '+ITEM_NAME(id))}
+function setLoadout(member,kind,id){if(!canTrain())return;let l=Object.assign({},loadout(member));if(id&&!isBase(id)&&ownedCount(id)-assignedCount(id,member)<=0){alert('這件裝備已全部配給其他隊員');render();return}if(id&&ITEM_KIND(id)!==kind)return;l[kind]=id;save.equipment.loadouts[member]=l;let r=save.roster.find(x=>x.id===member);if(r)recalcMember(r);persist(true);render()}
+// ===== 教學提示 =====
+const HINTS={deploy:'部署完成。看清楚棋盤：你（青色）、隊友、余獸、灰色瓦礫、黃框資料與綠邊撤離點。紅底格是敵方本輪會攻擊的位置。',move:'輪到你時，選「移動」再點綠框格：每格 1 AP，只能上下左右。',attack:'普通攻擊 1 AP。紅框是武器射程內、有視線的敵人；瓦礫會擋住視線。技能按鈕的射程與效果寫在按鈕下方。',warn:'有敵人預警攻擊你所在的格子。結束行動時保留 AP，敵人出手時就能選閃避（1 AP＋移動 1 AP）、硬接（1 AP，傷害減半）或反擊（2 AP）。',cache:'你在資料旁邊。按「互動」花 1 AP 回收；要帶著它撤離才拿得到點數。',extract:'走到撤離格後按「撤離」不花 AP。撤離前會列出目標完成狀態與未救起的隊友，由你決定。'};
+function hint(key){if(!save||save.settings.tutorialSeen.includes(key)||hintQueue.includes(key))return;hintQueue.push(key);showHint()}
+function showHint(){let k=hintQueue[0];if(!k){$('hint').classList.add('hidden');return}$('hint').innerHTML='<b>提示</b>　'+esc(HINTS[k])+' <button id="hintOk" class="ghost">知道了</button> <button id="hintAll" class="ghost">略過全部</button>';$('hint').classList.remove('hidden');$('hintOk').onclick=()=>{save.settings.tutorialSeen.push(hintQueue.shift());persist(false);showHint()};$('hintAll').onclick=()=>{Object.keys(HINTS).forEach(k=>{if(!save.settings.tutorialSeen.includes(k))save.settings.tutorialSeen.push(k)});hintQueue=[];persist(false);showHint()}}
+// ===== 戰鬥：查詢 =====
+function M(){return save&&save.currentMission}
+function allUnits(){let m=M();return m.actors.concat(m.enemies)}
+function findUnit(id){return allUnits().find(a=>a.id===id)}
+function standing(a){return a.hp>0&&!a.downed}
+function blocked(x,y,except){let m=M();if(x<0||y<0||x>=W||y>=H)return true;if(m.walls.includes(x+','+y))return true;return m.actors.some(a=>a.id!==except&&!a.carried&&a.x===x&&a.y===y&&(a.hp>0||a.downed))||m.enemies.some(e=>e.id!==except&&e.hp>0&&e.x===x&&e.y===y)}
+function lineOfSight(a,b){let m=M(),dx=b.x-a.x,dy=b.y-a.y,n=Math.max(Math.abs(dx),Math.abs(dy))*6;for(let i=1;i<n;i++){let x=Math.round(a.x+dx*i/n),y=Math.round(a.y+dy*i/n);if((x===a.x&&y===a.y)||(x===b.x&&y===b.y))continue;if(m.walls.includes(x+','+y))return false}return true}
+function inReach(a,t,range,min,los){let d=dist(a,t);return d<=range&&d>=(min||0)&&(!los||lineOfSight(a,t))}
+function weaponOf(a){return WEAPONS[a.weapon]||WEAPONS.rifle}
+function intentCells(){let m=M();return Object.values(m.intent||{}).filter(Boolean)}
+function isWarned(x,y){return intentCells().some(i=>i.x===x&&i.y===y)}
+function objectivesDone(){return M().enemies.filter(e=>e.objective&&e.hp<=0).length}
+function objectivesTotal(){return M().enemies.filter(e=>e.objective).length}
+function say(t){let m=M();if(!m)return;m.log.push(t);if(m.log.length>80)m.log.shift()}
+function stopTimers(){if(timer!==null){clearTimeout(timer);timer=null}reaction=null;waitingPlayer=false;hintQueue=[];$('reaction').classList.add('hidden');$('wdBox').classList.add('hidden');$('hint').classList.add('hidden')}
+function effDef(e){return Math.max(0,e.defense-(e.status&&e.status.break?1:0))}
+function areaCells(center,shape){let c=[{x:center.x,y:center.y}];[[1,0],[-1,0],[0,1],[0,-1]].forEach(d=>c.push({x:center.x+d[0],y:center.y+d[1]}));if(shape==='area3')[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(d=>c.push({x:center.x+d[0],y:center.y+d[1]}));return c.filter(p=>p.x>=0&&p.y>=0&&p.x<W&&p.y<H)}
+function skillById(id){return knownSkills().find(s=>s.id===id)}
+function currentSkill(){return mode.startsWith('skill:')?skillById(mode.slice(6)):null}
+function skillMp(p,s){let mp=s.mpCost;if(p.capacitorArmed)mp=Math.max(5,mp-5);return mp}
+// ===== 戰鬥：開始與回合 =====
+function startMission(){if(M()&&M().phase==='battle'){alert('目前任務尚未結束');return}let def=missionDef(),rule=ruleOf(def.rule),sc=squadCheck(rule);if(!sc.ok){alert(sc.msg);return}backupNow('任務開始前');stopTimers();
+ let pos=[[0,2],[0,1],[0,3],[1,2]];
+ let units=[rosterPlayer()].concat(squadIds().map(id=>save.roster.find(r=>r.id===id)));
+ let actors=units.map((r,i)=>{let a=clone(r),lo=loadout(r.id),lv=effLevel(r,rule);if(r.id!=='player'&&CAST[r.id])a.stats=statsAtLevel(r.id,lv);a.effLv=lv;a.x=pos[i][0];a.y=pos[i][1];a.weapon=lo.weapon;a.armor=lo.armor;a.accessory=lo.accessory;a.accUsed=false;a.freeDodge=lo.armor==='mobility';a.defense=ARMORS[lo.armor].def;a.maxHp=baseHp(a.stats,lv);a.maxMp=baseMp(a.stats,lv);a.downed=false;a.wasDowned=false;a.guard=false;a.damagePenalty=1;a.startInjury=r.injury?r.injury.type:null;
+  let inj=a.startInjury;if(inj==='heavy'){a.maxHp=Math.floor(a.maxHp*.75);a.hp=a.maxHp}else if(inj==='light'||inj==='heavy-recovering')a.hp=Math.floor(a.maxHp*.8);else a.hp=a.maxHp;
+  if(inj==='limb-leg'){a.stats.agi=Math.max(1,a.stats.agi-2);a.maxAp=Math.max(1,apFor(a.stats.agi)-1)}else a.maxAp=apFor(a.stats.agi);if(inj==='limb-arm')a.damagePenalty=.8;a.mp=a.maxMp;a.ap=a.maxAp;return a});
+ save.currentMission={id:uid(),title:def.title,chapterId:'sagamihara-opening',rule:{key:def.rule,label:rule.label,cap:rule.cap},phase:'battle',round:0,width:W,height:H,actors:actors,
+  enemies:[{id:'y1',name:'余獸 A',kind:'enemy',x:5,y:1,hp:45,maxHp:45,ap:1,maxAp:1,agi:2,defense:1,power:12,objective:true,status:{}},{id:'y2',name:'余獸 B',kind:'enemy',x:6,y:3,hp:45,maxHp:45,ap:1,maxAp:1,agi:1,defense:1,power:12,objective:true,status:{}},{id:'y3',name:'游蕩余獸',kind:'enemy',x:3,y:5,hp:38,maxHp:38,ap:1,maxAp:1,agi:2,defense:1,power:10,objective:false,status:{}}],
+  walls:['3,2','3,3','4,2'],cache:{x:2,y:5,recovered:false},extraction:{x:0,y:5},carryingIntel:false,rescued:[],kills:0,log:[],intent:{},order:[],orderIndex:0,activeActorId:null,equippedSkillIds:(save.playerCharacter.equippedSkillIds||[]).slice()};
+ save.campaign.phase='battle';save.campaign.missionCount++;save.narrativeState.timeMarker='相模原作戰中';save.narrativeState.locationId='sagamihara';
+ say('任務開始（'+rule.label+'）。清理指定區域兩隻余獸；游蕩余獸不計入主要目標。');actors.forEach(a=>{if(a.id!=='player'&&a.effLv<memberLevel(a.id))say(a.name+' 依訓練規定限制出力：Lv'+memberLevel(a.id)+' → Lv'+a.effLv+'。')});showTab('battle');hint('deploy');startRound()}
+function planIntents(){let m=M();m.intent={};m.enemies.forEach(e=>{if(e.hp<=0)return;let t=m.actors.filter(standing).sort((a,b)=>dist(e,a)-dist(e,b))[0];if(t&&dist(e,t)<=1)m.intent[e.id]={targetId:t.id,x:t.x,y:t.y}})}
+function agiOf(a){return a.stats?a.stats.agi:a.agi||1}
+function startRound(){let m=M();if(!m||m.phase!=='battle')return;m.round++;waitingPlayer=false;
+ m.enemies.forEach(e=>{if(!e.status)e.status={};if(e.status.expose){delete e.status.expose;if(e.hp>0)say(e.name+' 的暴露效果在輪末消失。')}delete e.status.marked});
+ allUnits().forEach(a=>{if(standing(a)){a.ap=a.maxAp;a.guard=false}else if(a.downed)a.ap=0});planIntents();
+ let rank=new Map(allUnits().map((a,i)=>[a.id,i]));m.order=allUnits().filter(standing).sort((a,b)=>agiOf(b)-agiOf(a)||rank.get(a.id)-rank.get(b.id)).map(a=>a.id);m.orderIndex=0;m.activeActorId=null;
+ say('第 '+m.round+' 回合開始；行動順序依敏捷，敵方預警已公開。');if(intentCells().some(i=>m.actors.some(a=>a.x===i.x&&a.y===i.y&&a.kind==='player')))hint('warn');
+ persist(true);renderBattle();queueAdvance()}
+function queueAdvance(){if(timer!==null)return;timer=setTimeout(()=>{timer=null;advance()},380)}
+function sideDefeated(){return M().actors.every(a=>!standing(a))}
+function advance(){let m=M();if(!m||m.phase!=='battle'||reaction||waitingPlayer)return;if(sideDefeated()){finish('失敗','全隊倒地');return}
+ for(let guard=0;guard<50;guard++){
+  if(m.orderIndex>=m.order.length){startRound();return}
+  let id=m.order[m.orderIndex++],a=findUnit(id);if(!a||!standing(a))continue;
+  m.activeActorId=id;
+  if(a.kind==='player'){waitingPlayer=true;mode='move';hint('move');persist(true);renderBattle();return}
+  if(a.kind==='ally')autoAlly(a);else if(autoEnemy(a))return;
+  if(M()&&M().phase==='battle'){if(sideDefeated()){finish('失敗','全隊倒地');return}persist(true);renderBattle();queueAdvance()}return}
+ console.error('advance guard tripped')}
+// ===== 傷害與效果 =====
+function stepToward(a,goalTest){let dirs=[[1,0],[-1,0],[0,1],[0,-1]],q=[{x:a.x,y:a.y,f:null}],seen=new Set([a.x+','+a.y]);for(let i=0;i<q.length;i++){let c=q[i];if(i>0&&goalTest(c)){a.x=c.f.x;a.y=c.f.y;return true}for(let d of dirs){let x=c.x+d[0],y=c.y+d[1],k=x+','+y;if(seen.has(k)||blocked(x,y,a.id))continue;seen.add(k);q.push({x,y,f:c.f||{x,y}})}}return false}
+function damageRoll(atk,power,attrVal,target,opts){opts=opts||{};let def=Math.max(0,effDef(target)-(opts.ignoreDef||0));let d=Math.max(1,power+Math.floor(attrVal/2)-def);let bonus=[];
+ if(target.status&&target.status.expose){d+=4;bonus.push('暴露 +4');delete target.status.expose}
+ if(target.status&&target.status.marked){d+=2;bonus.push('觀測 +2');delete target.status.marked}
+ if(atk.damagePenalty&&atk.damagePenalty<1)d=Math.max(1,Math.floor(d*atk.damagePenalty));return {d,bonus}}
+function hitEnemy(atk,e,roll,how){e.hp-=roll.d;say(atk.name+(how?' '+how:' 攻擊')+' '+e.name+'，造成 '+roll.d+' 傷害'+(roll.bonus.length?'（'+roll.bonus.join('、')+'）':'')+'。');if(e.hp<=0){e.hp=0;e.status={};M().kills++;M().intent[e.id]=null;say(e.name+' 被擊倒。');if(objectivesDone()===objectivesTotal()){say('主要目標已完成；可繼續回收資料或撤離。');hint('extract')}}}
+function applyFx(e,s){if(e.hp<=0||!s.effect)return;if(!e.status)e.status={};if(s.effect==='break'){e.status.break=true;say(e.name+' 被破甲：防禦 −1，至它下次行動結束。')}if(s.effect==='expose'){e.status.expose=true;say(e.name+' 被暴露：下一次命中 +4。')}if(s.effect==='pin'){e.status.pin=Math.max(e.status.pin||0,s.pinTurns||1);say(e.name+' 被牽制：下次行動不能移動'+(s.pinTurns>1?'（持續 '+s.pinTurns+' 次行動）':'')+'。')}}
+function heal(by,t,amount,how){let before=t.hp;t.hp=Math.min(t.maxHp,t.hp+amount);say(by.name+' '+how+'，'+(t.id===by.id?'自己':t.name)+' 恢復 '+(t.hp-before)+' HP。')}
+function rescue(by,t){if(t.carried){t.carried=false;let c=M().actors[0];if(c.carrying===t.id)c.carrying=null}t.downed=false;t.wasDowned=true;t.hp=Math.max(1,Math.floor(t.maxHp*.25));t.ap=0;if(!M().rescued.includes(t.id))M().rescued.push(t.id);say(by.name+' 救起 '+t.name+'，恢復至 25% HP（下一輪起行動）。')}
+// ===== 隊友與敵人 =====
+function autoAlly(a){let m=M(),w=weaponOf(a),acts=0;
+ while(a.ap>1&&acts<8){acts++;
+  let down=m.actors.find(x=>x.downed&&!x.carried&&x.id!==a.id&&dist(a,x)===1);if(down){a.ap--;rescue(a,down);continue}
+  if(a.accessory==='injector'&&!a.accUsed){let hurt=m.actors.filter(x=>standing(x)&&dist(a,x)<=1&&x.hp<x.maxHp*.5).sort((x,y)=>x.hp/x.maxHp-y.hp/y.maxHp)[0];if(hurt){a.ap--;a.accUsed=true;heal(a,hurt,10,'使用急救注射器');continue}}
+  let needy=m.actors.filter(x=>x.downed&&!x.carried).sort((x,y)=>dist(a,x)-dist(a,y))[0];
+  if(needy&&(needy.kind==='player'||dist(a,needy)<=3)){if(stepToward(a,c=>dist(c,needy)===1)){a.ap--;say(a.name+' 移動，準備救援 '+needy.name+'。');continue}}
+  let foes=m.enemies.filter(e=>e.hp>0);if(!foes.length)break;
+  let target=foes.filter(e=>inReach(a,e,w.range,w.min,w.los)).sort((x,y)=>(y.objective-x.objective)||(x.hp-y.hp))[0];
+  if(target){a.ap--;hitEnemy(a,target,damageRoll(a,w.power,a.stats.str,target),'以'+w.name+'攻擊');continue}
+  let goal=foes.slice().sort((x,y)=>(y.objective-x.objective)||dist(a,x)-dist(a,y))[0];
+  if(stepToward(a,c=>{let d=dist(c,goal);return d<=w.range&&d>=w.min&&(!w.los||lineOfSight(c,goal))})){a.ap--;say(a.name+' 移動接近 '+goal.name+'。');continue}
+  break}
+ if(acts===0)say(a.name+' 保持位置，留 AP 應對攻擊。')}
+function endEnemyAction(e){if(e.status){if(e.status.break){delete e.status.break;say(e.name+' 的破甲效果結束。')}}e.ap=0;M().intent[e.id]=null}
+function autoEnemy(e){let m=M(),it=m.intent[e.id];
+ if(it){let t=m.actors.find(a=>standing(a)&&a.x===it.x&&a.y===it.y);
+  if(t&&t.kind==='player'&&t.ap>=1){reaction={enemyId:e.id,x:it.x,y:it.y};showReaction();return true}
+  if(t){let half=false;if(t.kind==='ally'&&t.ap>=1){t.ap--;half=true;say(t.name+' 硬接 '+e.name+' 的攻擊。')}enemyAttack(e,t,half)}else say(e.name+' 攻擊預警格，沒有命中任何人。')}
+ else if(e.status&&e.status.pin>0){say(e.name+' 被牽制，無法移動。')}
+ else{let t=m.actors.filter(standing).sort((a,b)=>dist(e,a)-dist(e,b))[0];if(t&&dist(e,t)>1){if(stepToward(e,c=>dist(c,t)===1))say(e.name+' 推進接近小隊。');else say(e.name+' 找不到路線，原地警戒。')}}
+ if(e.status&&e.status.pin>0)e.status.pin--;
+ endEnemyAction(e);return false}
+function enemyAttack(e,t,half){let d=Math.max(1,e.power-t.defense);if(half)d=Math.max(1,Math.floor(d/2));if(t.guard){d=Math.max(1,Math.floor(d/2));t.guard=false;say(t.name+' 的守勢減半了傷害。')}t.hp-=d;say(e.name+' 攻擊 '+t.name+'，造成 '+d+' 傷害。');if(t.hp<=0){t.hp=0;t.downed=true;t.ap=0;say(t.name+' 倒地！相鄰隊友花 1 AP 可救起。');if(t.carrying)dropCarried(t,'你倒下了')}}
+function safeCells(p){return [[0,-1],[0,1],[-1,0],[1,0]].map(d=>({x:p.x+d[0],y:p.y+d[1]})).filter(c=>!blocked(c.x,c.y,p.id)&&!isWarned(c.x,c.y))}
+function dodgeCost(p){return (p.freeDodge?1:2)+(p.carrying?1:0)}
+function showReaction(){let r=reaction,e=findUnit(r.enemyId),p=M().actors[0],w=weaponOf(p),cells=safeCells(p),dmg=Math.max(1,e.power-p.defense),dc=dodgeCost(p);
+ let canDodge=p.ap>=dc&&cells.length>0,canCounter=p.ap>=2&&inReach(p,e,w.range,w.min,w.los);
+ if(r.pick){$('reaction').innerHTML='<b>選擇閃避的格子</b>（點棋盤上綠框的安全格；花 '+dc+' AP）<br><button data-r="cancel">取消，回到選項</button>';$('reaction').classList.remove('hidden');$('reaction').querySelectorAll('button').forEach(b=>b.onclick=()=>{reaction.pick=false;showReaction()});renderBattle();return}
+ $('reaction').innerHTML='<b>'+esc(e.name)+' 攻擊你所在的格子（預估 '+dmg+' 傷害'+(p.guard?'，守勢再減半':'')+'）。</b> 剩餘 AP '+p.ap+'：<br><button data-r="dodge" '+(canDodge?'':'disabled')+'>閃避 '+dc+' AP'+(p.freeDodge?'（機動防護服）':'')+(cells.length?'':'（無安全格）')+'</button> <button data-r="brace" '+(p.ap>=1?'':'disabled')+'>硬接 1 AP</button> <button data-r="counter" '+(canCounter?'':'disabled')+'>反擊 2 AP</button> <button data-r="hit">不反應</button>';
+ $('reaction').classList.remove('hidden');$('reaction').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.r==='dodge'){let c=safeCells(M().actors[0]);if(c.length===1)resolveReaction('dodge',c[0]);else{reaction.pick=true;showReaction()}}else resolveReaction(b.dataset.r)});renderBattle()}
+function resolveReaction(choice,cell){if(!reaction)return;let m=M(),r=reaction,e=findUnit(r.enemyId),p=m.actors[0],half=false,w=weaponOf(p);
+ if(choice==='dodge'){let cells=safeCells(p),dc=dodgeCost(p);if(p.ap<dc||!cells.length){toast('無法閃避');return}p.ap-=dc;if(p.freeDodge){p.freeDodge=false;say('機動防護服：這次閃避不用另付移動 AP。')}let to=cell&&cells.find(c=>c.x===cell.x&&c.y===cell.y)||cells[0];p.x=to.x;p.y=to.y;syncCarried();say('你閃避到 '+(p.x+1)+','+(p.y+1)+'，'+e.name+' 的攻擊落空。')}
+ else if(choice==='brace'){if(p.ap<1){toast('AP 不足');return}p.ap-=1;half=true;say('你硬接攻擊。')}
+ else if(choice==='counter'){if(p.ap<2||!inReach(p,e,w.range,w.min,w.los)){toast('無法反擊');return}p.ap-=2;half=true}
+ if(choice!=='dodge'){enemyAttack(e,p,half);if(choice==='counter'&&e.hp>0)hitEnemy(p,e,damageRoll(p,w.power,p.stats.str,e),'反擊')}
+ if(e.status&&e.status.pin>0)e.status.pin--;
+ endEnemyAction(e);reaction=null;$('reaction').classList.add('hidden');
+ if(sideDefeated()){finish('失敗','全隊倒地');return}persist(true);renderBattle();queueAdvance()}
+// ===== 玩家行動 =====
+function playerReady(){let m=M();return m&&m.phase==='battle'&&m.activeActorId==='player'&&waitingPlayer&&!reaction}
+function validSkillTarget(p,s,x,y){let m=M(),t=SKILL_TPL[s.template];if(t.kind==='heal'){let a=m.actors.find(u=>standing(u)&&u.x===x&&u.y===y);return !!a&&dist(p,a)<=s.range}
+ if(t.kind==='area'){let c={x,y};if(m.walls.includes(x+','+y))return false;return dist(p,c)<=s.range&&(!s.needsLos||lineOfSight(p,c))}
+ let e=m.enemies.find(u=>u.hp>0&&u.x===x&&u.y===y);return !!e&&inReach(p,e,s.range,1,s.needsLos)}
+function doCell(x,y){if(reaction&&reaction.pick){let p=M().actors[0];if(safeCells(p).some(c=>c.x===x&&c.y===y))resolveReaction('dodge',{x,y});else toast('請點綠框的安全格');return}
+ if(!playerReady())return;let m=M(),p=m.actors[0];if(p.ap<=0)return;
+ if(p.carrying&&mode!=='move'){toast('搬運中不能攻擊或使用技能；請先放下');return}
+ if(mode==='move'){let cost=p.carrying?2:1;if(dist(p,{x,y})!==1||blocked(x,y,p.id)){toast('只能移動到相鄰的空格');return}if(p.ap<cost){toast('搬運中每格需要 2 AP');return}p.ap-=cost;p.x=x;p.y=y;syncCarried();say('你移動至 '+(x+1)+','+(y+1)+'（消耗 '+cost+' AP，剩 '+p.ap+'）'+(p.carrying?'，背著 '+nameOf(p.carrying):'')+'。');if(!m.cache.recovered&&dist(p,m.cache)<=1)hint('cache');if(x===m.extraction.x&&y===m.extraction.y)hint('extract');return afterPlayerAction()}
+ if(mode==='attack'){let e=m.enemies.find(a=>a.hp>0&&a.x===x&&a.y===y);if(!e){toast('請點選敵人');return}let w=weaponOf(p);if(!inReach(p,e,w.range,w.min,w.los)){toast(dist(p,e)>w.range?'超出射程':dist(p,e)<w.min?'距離太近':'視線被瓦礫擋住');return}p.ap--;let ign=p.aimArmed?1:0;if(p.aimArmed){p.aimArmed=false;say('強化瞄準模組：這次攻擊忽略 1 點防禦。')}hitEnemy(p,e,damageRoll(p,w.power,p.stats.str,e,{ignoreDef:ign}),'以'+w.name+'攻擊');return afterPlayerAction()}
+ if(mode==='acc'){return useAccOnCell(x,y)}
+ let s=currentSkill();if(!s)return;let t=SKILL_TPL[s.template],mp=skillMp(p,s);if(p.ap<s.apCost){toast('AP 不足');return}if(p.mp<mp){toast('MP 不足');return}
+ if(!validSkillTarget(p,s,x,y)){toast(t.kind==='heal'?'請點選自己或相鄰的隊友':t.kind==='area'?'範圍中心須在 '+s.range+' 格內且有視線':'目標不在射程內或視線被擋');return}
+ p.ap-=s.apCost;p.mp-=mp;if(p.capacitorArmed){p.capacitorArmed=false;say('高能電容：這次技能少花 5 MP。')}
+ if(t.kind==='heal'){let a=m.actors.find(u=>standing(u)&&u.x===x&&u.y===y);heal(p,a,s.power,'使用「'+s.name+'」')}
+ else if(t.kind==='area'){let cells=areaCells({x,y},s.shape),hit=m.enemies.filter(e=>e.hp>0&&cells.some(c=>c.x===e.x&&c.y===e.y));say('你使用「'+s.name+'」轟擊 '+(x+1)+','+(y+1)+' 周圍。');if(!hit.length)say('範圍內沒有敵人。');hit.forEach(e=>{hitEnemy(p,e,damageRoll(p,s.power,p.stats[s.attr],e),'的範圍攻擊波及');applyFx(e,s)})}
+ else{let e=m.enemies.find(u=>u.hp>0&&u.x===x&&u.y===y);hitEnemy(p,e,damageRoll(p,s.power,p.stats[s.attr],e),'使用「'+s.name+'」攻擊');applyFx(e,s)}
+ afterPlayerAction()}
+function afterPlayerAction(){let p=M().actors[0];if(p.ap<=0){waitingPlayer=false;M().activeActorId=null;say('你的 AP 用完了。');persist(true);renderBattle();queueAdvance();return}persist(true);renderBattle()}
+function syncCarried(){let m=M(),p=m.actors[0];if(!p.carrying)return;let c=m.actors.find(a=>a.id===p.carrying);if(c){c.x=p.x;c.y=p.y}}
+function freeAdjacent(p){return [[0,-1],[0,1],[-1,0],[1,0]].map(d=>({x:p.x+d[0],y:p.y+d[1]})).filter(c=>!blocked(c.x,c.y,p.id)).sort((a,b)=>isWarned(a.x,a.y)-isWarned(b.x,b.y))[0]||null}
+function dropCarried(p,why){let m=M();if(!p.carrying)return true;let c=m.actors.find(a=>a.id===p.carrying);if(!c){p.carrying=null;return true}let cell=freeAdjacent(p);if(!cell)return false;c.carried=false;c.x=cell.x;c.y=cell.y;p.carrying=null;say(p.name+' 把 '+c.name+' 放在 '+(cell.x+1)+','+(cell.y+1)+(why?'（'+why+'）':'')+'。');return true}
+function carryAct(){if(!playerReady())return;let m=M(),p=m.actors[0];
+ if(p.carrying){if(!dropCarried(p)){toast('旁邊沒有空格可以放下');return}persist(true);renderBattle();return}
+ let c=m.actors.find(a=>a.downed&&!a.carried&&dist(p,a)===1);if(!c){toast('需與倒地隊友相鄰');return}if(p.ap<1){toast('AP 不足');return}
+ p.ap--;c.carried=true;p.carrying=c.id;c.x=p.x;c.y=p.y;mode='move';say('你背起 '+c.name+'。搬運期間每格移動花 2 AP，不能攻擊、用技能或互動；帶到撤離格即視為救出。');afterPlayerAction()}
+function guardAct(){if(!playerReady())return;let p=M().actors[0];if(p.guard){toast('守勢已在生效');return}if(p.ap<1)return;p.ap--;p.guard=true;say('你進入守勢，本輪第一次受到的傷害減半。');afterPlayerAction()}
+function interact(){if(!playerReady())return;let m=M(),p=m.actors[0];if(p.carrying){toast('搬運中不能互動，請先放下');return}if(p.ap<1)return;
+ if(!m.cache.recovered&&dist(p,m.cache)<=1){p.ap--;m.cache.recovered=true;m.carryingIntel=true;say('你回收怪獸資料。帶著它撤離才取得點數。');afterPlayerAction();return}
+ let a=m.actors.find(x=>x.downed&&!x.carried&&dist(p,x)===1);if(a){p.ap--;rescue(p,a);afterPlayerAction();return}
+ toast('需與回收資料或倒地隊友相鄰')}
+function accButton(){if(!playerReady())return;let p=M().actors[0],k=p.accessory;if(!k||p.accUsed)return;if(p.carrying){toast('搬運中不能使用輔助裝備；請先放下');return}
+ if(k==='capacitor'){p.accUsed=true;p.capacitorArmed=true;say('啟動高能電容：下一次技能少花 5 MP。');return afterPlayerAction()}
+ if(k==='aim-module'){p.accUsed=true;p.aimArmed=true;say('啟動強化瞄準模組：下一次普通攻擊忽略 1 點防禦。');return afterPlayerAction()}
+ if(k==='anchor'){toast('穩定錨具是被動裝備，本任務沒有擊退攻擊');return}
+ if(p.ap<1){toast('AP 不足');return}mode='acc';renderBattle()}
+function useAccOnCell(x,y){let m=M(),p=m.actors[0],k=p.accessory;if(!k||p.accUsed||p.ap<1)return;
+ if(k==='injector'){let a=m.actors.find(u=>standing(u)&&u.x===x&&u.y===y&&dist(p,u)<=1);if(!a){toast('請點選自己或相鄰的隊友');return}p.ap--;p.accUsed=true;heal(p,a,10,'使用急救注射器');mode='move';return afterPlayerAction()}
+ if(k==='scope-tag'){let e=m.enemies.find(u=>u.hp>0&&u.x===x&&u.y===y);if(!e||!lineOfSight(p,e)){toast('請點選有視線的敵人');return}p.ap--;p.accUsed=true;e.status=e.status||{};e.status.marked=true;say('你用觀測模組標記 '+e.name+'：本輪第一次命中 +2。');mode='move';return afterPlayerAction()}}
+function endTurn(){if(!playerReady())return;let m=M(),p=m.actors[0];waitingPlayer=false;m.activeActorId=null;say('你結束行動，保留 '+p.ap+' AP 應對敵方攻擊。');persist(true);renderBattle();queueAdvance()}
+function canWithdraw(){let m=M();return !!m&&m.phase==='battle'&&!reaction&&standing(m.actors[0])}
+function withdraw(){let m=M();if(!m||m.phase!=='battle')return;if(reaction){toast('請先選擇防禦反應');return}let p=m.actors[0];if(!standing(p)){toast('你已倒地，無法撤離');return}
+ if(p.x!==m.extraction.x||p.y!==m.extraction.y){toast('先移動到撤離格（左下角，第 '+(m.extraction.x+1)+','+(m.extraction.y+1)+' 格）');return}
+ let k=objectivesDone(),tot=objectivesTotal(),downed=m.actors.filter(a=>a.downed).map(a=>a.name);
+ $('wdBox').innerHTML='<b>撤離確認</b><br>主要目標：擊倒 '+k+'／'+tot+'<br>回收資料：'+(m.carryingIntel?'已攜帶':'未攜帶')+(downed.length?'<br>倒地未救起：'+esc(downed.join('、'))+'（結算為重傷）':'')+'<br>撤離不花 AP；確定後全隊離開戰場。<br><button id="wdYes" class="danger">確定撤離</button> <button id="wdNo" class="ghost">取消</button>';
+ $('wdBox').classList.remove('hidden');$('wdYes').onclick=doWithdraw;$('wdNo').onclick=()=>$('wdBox').classList.add('hidden')}
+function doWithdraw(){let m=M();$('wdBox').classList.add('hidden');if(!m||m.phase!=='battle'||!canWithdraw()){toast('現在不能撤離');return}let p=m.actors[0];if(p.x!==m.extraction.x||p.y!==m.extraction.y){toast('你已不在撤離格');return}
+ if(p.carrying){let c=m.actors.find(a=>a.id===p.carrying);if(c){c.carried=false;p.carrying=null;rescue(p,c);say(c.name+' 被背到撤離點，視為救出。')}}
+ let k=objectivesDone(),tot=objectivesTotal();
+ let result,summary;if(k===tot){result='成功';summary='完成主要目標後撤離'}else if(k>0){result='部分成功';summary='擊倒 '+k+'／'+tot+' 隻指定余獸後撤離'}else if(m.carryingIntel||m.rescued.length||m.kills>0){result='有代價撤退';summary='未擊倒指定余獸，帶著部分成果撤離'}else{result='失敗';summary='未完成任何任務行動便撤離'}
+ if(m.carryingIntel)summary+='，帶回回收資料';finish(result,summary)}
+// ===== 結算 =====
+function finish(result,summary){let m=M();if(!m||m.phase!=='battle')return;stopTimers();backupNow('任務結算前');
+ let p=m.actors[0],intelOk=m.carryingIntel&&standing(p)&&summary!=='全隊倒地';
+ let pts=intelOk?5:0,xp=Math.min(60,XP_BASE[result]+(intelOk?10:0));
+ let pg=save.progression,xpBy={},injuries={},growth=[];
+ m.actors.forEach(b=>{let r=save.roster.find(x=>x.id===b.id);if(!r)return;let mem=pg.members[b.id]||(pg.members[b.id]={level:1,xp:0});let before=mem.level;mem.xp+=xp;mem.level=levelFor(mem.xp);xpBy[b.id]=xp;
+  if(mem.level>before){say(b.name+' 升到 Lv'+mem.level+'。');if(b.id==='player')for(let l=before+1;l<=mem.level;l++)if(l%2===0){pg.growthPoints.available++;let g={source:'level',amount:1,label:'升到 Lv'+l,at:now()};pg.growthPoints.history.push(g);growth.push(g)}}
+  let inj=null;if(b.downed)inj='heavy';else if(b.hp<=b.maxHp*.25||b.wasDowned)inj='light';else if(b.startInjury==='heavy')inj='heavy-recovering';
+  r.injury=inj?{type:inj,label:injuryText({type:inj})}:null;injuries[b.id]=inj;recalcMember(r);r.hp=Math.min(r.maxHp,Math.max(0,b.hp));r.mp=Math.min(r.maxMp,b.mp)});
+ pg.recoveryPoints+=pts;
+ if(!pg.awarded.chapters.includes(m.chapterId)){pg.awarded.chapters.push(m.chapterId);pg.growthPoints.available++;let g={source:'chapter',amount:1,label:'首次完成相模原任務',at:now()};pg.growthPoints.history.push(g);growth.push(g)}
+ save.missionHistory.push({missionId:m.id,title:m.title,chapterId:m.chapterId,result,summary,completedAt:now(),
+  objectives:{main:objectivesDone()===objectivesTotal(),subObjectives:m.enemies.filter(e=>e.objective).map(e=>({id:e.id,label:'擊倒'+e.name,done:e.hp<=0})),optional:[{id:'intel',label:'帶回回收資料',done:intelOk}]},
+  xp:xpBy.player||0,xpByMember:xpBy,recoveryPoints:pts,injuries,rescued:m.rescued.slice(),growthAwards:growth});
+ save.currentMission=null;save.campaign.phase='mission_debrief';save.narrativeState.locationId='sagamihara-debrief';save.narrativeState.timeMarker='相模原任務結束後';
+ persist(true);showTab('campaign');toast('任務結算：'+result)}
+// ===== 戰鬥畫面 =====
+function renderBattle(){let m=M();
+ ['move','attack','acc','guard','interact','end','extract','carry'].forEach(id=>$(id).disabled=true);
+ if(!m){$('round').textContent='尚未出擊';$('turn').textContent='到「整備與簡報」部署';$('board').innerHTML='';$('order').textContent='';$('battleParty').innerHTML='';$('objective').innerHTML='';$('combatLog').innerHTML='';$('skillBtns').innerHTML='';$('modeNote').textContent='';return}
+ let active=findUnit(m.activeActorId),p=m.actors[0],ready=playerReady(),w=weaponOf(p),cs=currentSkill(),eq=knownSkills().filter(s=>(m.equippedSkillIds||[]).includes(s.id));
+ $('round').textContent='第 '+m.round+' 回合';
+ $('turn').textContent=reaction?'選擇防禦反應':active?(active.kind==='player'?'你的行動 · AP '+p.ap+'/'+p.maxAp+' · MP '+p.mp:active.name+' 行動中'):'回合推進中';
+ $('order').innerHTML='行動順序：'+m.order.map((id,i)=>{let u=findUnit(id),n=u?(u.kind==='player'?'你':u.name):id;return i===m.orderIndex-1&&id===m.activeActorId?'<b>'+esc(n)+'</b>':esc(n)}).join(' → ');
+ let aoe=[];if(ready&&cs&&SKILL_TPL[cs.template].kind==='area'&&hoverCell&&validSkillTarget(p,cs,hoverCell.x,hoverCell.y))aoe=areaCells(hoverCell,cs.shape);
+ let board=$('board');board.innerHTML='';
+ for(let y=0;y<H;y++)for(let x=0;x<W;x++){let d=document.createElement('button');d.className='tile';d.type='button';
+  if(m.walls.includes(x+','+y)){d.classList.add('wall');d.textContent='瓦礫'}
+  if(m.cache.x===x&&m.cache.y===y&&!m.cache.recovered){d.classList.add('cache');d.textContent='資料'}
+  if(m.extraction.x===x&&m.extraction.y===y){d.classList.add('exit');d.textContent='撤離'}
+  if(isWarned(x,y))d.classList.add('warn');
+  if(aoe.some(c=>c.x===x&&c.y===y))d.classList.add('aoe');
+  let a=m.actors.find(u=>!u.carried&&(u.hp>0||u.downed)&&u.x===x&&u.y===y)||m.enemies.find(u=>u.hp>0&&u.x===x&&u.y===y);
+  if(a){let label=a.kind==='player'?(a.carrying?'你背':'你'):a.kind==='enemy'?a.name.replace('余獸 ','余獸'):a.name.slice(-2);let st=a.kind==='enemy'&&a.status?Object.keys(a.status).filter(k=>a.status[k]).map(k=>({break:'破甲',expose:'暴露',pin:'牽制',marked:'標記'})[k]).join(' '):'';
+   d.innerHTML='<span class="token '+(a.downed?'down':a.kind)+'">'+esc(a.downed?'倒地':label)+'<span class="small"><br>'+(a.downed?esc(a.name.slice(-2)):a.hp+'/'+a.maxHp)+'</span>'+(st?'<br><span class="st">'+st+'</span>':'')+'</span>';if(a.id===m.activeActorId)d.classList.add('active')}
+  if(reaction&&reaction.pick&&safeCells(p).some(c=>c.x===x&&c.y===y))d.classList.add('move');
+  if(ready){
+   if(mode==='move'&&dist(p,{x,y})===1&&!blocked(x,y,'player'))d.classList.add('move');
+   if(mode==='attack'&&a&&a.kind==='enemy'&&inReach(p,a,w.range,w.min,w.los))d.classList.add('target');
+   if(cs&&validSkillTarget(p,cs,x,y))d.classList.add(SKILL_TPL[cs.template].kind==='heal'?'ally-target':'target');
+   if(mode==='acc'&&p.accessory==='injector'&&a&&a.kind!=='enemy'&&standing(a)&&dist(p,a)<=1)d.classList.add('ally-target');
+   if(mode==='acc'&&p.accessory==='scope-tag'&&a&&a.kind==='enemy'&&lineOfSight(p,a))d.classList.add('target')}
+  d.onclick=()=>doCell(x,y);d.onmouseenter=()=>{if(cs&&SKILL_TPL[cs.template].kind==='area'&&!(hoverCell&&hoverCell.x===x&&hoverCell.y===y)){hoverCell={x,y};renderBattle()}};board.appendChild(d)}
+ $('battleParty').innerHTML=m.actors.map(a=>memberCard(a,true)).join('');
+ $('objective').innerHTML=m.enemies.filter(e=>e.objective).map(e=>'<p>'+(e.hp<=0?'✅':'⬜')+' 擊倒'+esc(e.name)+(e.hp>0?'（'+e.hp+'/'+e.maxHp+'）':'')+'</p>').join('')+'<p>'+(m.carryingIntel?'✅':'⬜')+' 回收資料並帶出（可選）：'+(m.carryingIntel?'已攜帶':'未回收')+'</p><p class="muted">撤離：玩家走到撤離格後按「撤離」。</p>';
+ $('combatLog').innerHTML=m.log.slice().reverse().map(x=>'<p>'+esc(x)+'</p>').join('');
+ $('skillBtns').innerHTML=eq.map(s=>'<button data-skill="'+s.id+'" class="'+(mode==='skill:'+s.id?'on':'')+'" '+(ready&&p.ap>=s.apCost&&p.mp>=skillMp(p,s)?'':'disabled')+'>'+esc(s.name)+' '+s.apCost+' AP／'+skillMp(p,s)+' MP</button>').join('');
+ $('skillBtns').querySelectorAll('[data-skill]').forEach(b=>b.onclick=()=>{mode='skill:'+b.dataset.skill;hoverCell=null;renderBattle()});
+ let acc=p.accessory?ACCS[p.accessory]:null;$('acc').textContent=acc?acc.name+(p.accUsed?'（已用）':''):'無輔助裝備';
+ if(ready){['move','attack','guard','end'].forEach(id=>$(id).disabled=false);$('acc').disabled=!acc||p.accUsed||p.accessory==='anchor';$('interact').disabled=p.carrying||!((!m.cache.recovered&&dist(p,m.cache)<=1)||m.actors.some(a=>a.downed&&!a.carried&&dist(p,a)===1));$('carry').disabled=!(p.carrying||(p.ap>=1&&m.actors.some(a=>a.downed&&!a.carried&&dist(p,a)===1)));if(p.carrying){['attack','acc'].forEach(id=>$(id).disabled=true)}}
+ $('carry').textContent=p.carrying?'放下 '+nameOf(p.carrying):'搬運倒地隊友 1 AP';$('move').textContent=p.carrying?'移動 2 AP／格（搬運中）':'移動 1 AP／格';
+ $('extract').disabled=!(canWithdraw()&&p.x===m.extraction.x&&p.y===m.extraction.y);
+ $('attack').textContent='普通攻擊 1 AP（射程 '+(w.min>1?w.min+'–':'')+w.range+'）'+(p.aimArmed?'＋瞄準':'');
+ ['move','attack'].forEach(id=>$(id).classList.toggle('on',mode===id));$('acc').classList.toggle('on',mode==='acc');
+ $('modeNote').textContent=!ready?'':mode==='move'?'移動：點綠框格。':mode==='attack'?'普通攻擊：點紅框敵人（'+w.name+'，威力 '+w.power+'）。':mode==='acc'?(p.accessory==='injector'?'急救注射器：點自己或相鄰隊友。':'觀測模組：點一名有視線的敵人。'):cs?'「'+cs.name+'」：'+skillLine(cs)+(SKILL_TPL[cs.template].kind==='area'?'。滑過格子可預覽範圍。':''):''}
+function resumeBattle(){let m=M();if(!m||m.phase!=='battle')return;stopTimers();
+ m.actors.forEach(a=>{if(!a.weapon){let lo=loadout(a.id);a.weapon=lo.weapon;a.armor=lo.armor;a.defense=ARMORS[lo.armor].def}if(a.accessory===undefined)a.accessory=null;if(a.damagePenalty==null)a.damagePenalty=1;if(a.wasDowned==null)a.wasDowned=false});m.enemies.forEach(e=>{if(!e.status)e.status={}});if(!m.rescued)m.rescued=[];if(m.kills==null)m.kills=m.enemies.filter(e=>e.hp<=0).length;if(!m.chapterId)m.chapterId='sagamihara-opening';if(!m.equippedSkillIds)m.equippedSkillIds=(save.playerCharacter.equippedSkillIds||[]).slice();
+ if(m.activeActorId==='player'){waitingPlayer=true;mode='move';renderBattle();return}
+ if(m.activeActorId){let u=findUnit(m.activeActorId);if(u&&u.kind==='enemy'&&m.intent[u.id]){m.orderIndex=Math.max(0,m.order.indexOf(u.id))}}
+ m.activeActorId=null;renderBattle();queueAdvance()}
+// ===== AI 交接 =====
+function makeSnapshot(){let action=$('playerAction').value.trim();if(!action&&!confirm('還沒有輸入你的行動或對話。仍要產生快照嗎？'))return;
+ let m=M(),last=save.missionHistory[save.missionHistory.length-1],pr=rosterPlayer(),ns=save.narrativeState,lo=loadout('player');
+ let flags=Object.keys(ns.flagValues).map(f=>(ns.flagRegistry[f]?ns.flagRegistry[f].label:f)+'：'+ns.flagValues[f]);
+ let since=last?last.completedAt:save.createdAt,recent=save.progression.growthPoints.history.filter(h=>h.source==='spent'&&h.at>since).map(h=>h.label);
+ let s={protocol:'kaiju.local/v1',event:'narration_request',snapshotId:uid(),campaignId:save.campaignId,sourceRevision:save.revision,createdAt:now(),
+  scene:{chapterId:save.campaign.chapterId,locationId:ns.locationId,timeMarker:ns.timeMarker,phase:save.campaign.phase,recentOutcome:m?'戰鬥進行中，第 '+m.round+' 回合':last?last.result+'：'+last.summary:'準備首次任務',recentTraining:recent},
+  playerCharacter:{id:'player',name:pr.name,identity:save.playerCharacter.role,level:save.progression.level,relevantCondition:injuryText(pr.injury),growthPointsAvailable:save.progression.growthPoints.available,loadout:ITEM_NAME(lo.weapon)+'、'+ITEM_NAME(lo.armor)+(lo.accessory?'、'+ITEM_NAME(lo.accessory):''),skills:equippedSkills().map(x=>x.name+'（'+SKILL_TPL[x.template].label+'）')},
+  participants:save.roster.filter(a=>a.id!=='player'&&squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,role:'隊伍成員',tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id),relevantCondition:injuryText(a.injury),relationship:(ns.relationships[a.id]?ns.relationships[a.id].stage+(ns.relationships[a.id].friction?'（有摩擦）':''):'普通'),knownFacts:ns.intel.filter(i=>i.scope==='squad'||(i.knownBy||[]).includes(a.id)).map(i=>i.text)})),
+  availableMembers:save.roster.filter(a=>a.id!=='player'&&!squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id)})),
+  narrativeState:{relevantIntel:ns.intel.filter(i=>i.scope==='player'||i.scope==='squad').map(i=>i.text),relevantFlags:flags},playerAction:action};
+ $('snapshotOut').value=JSON.stringify(s,null,2);save.snapshotRegistry.push({snapshotId:s.snapshotId,sourceRevision:s.sourceRevision,createdAt:s.createdAt,processed:false});persist(false)}
+function validateEvent(e){if(!e||typeof e!=='object')return '格式錯誤';let keys=Object.keys(e),allowed=['id','type','targetId','payload','basis'];let extra=keys.filter(k=>!allowed.includes(k));if(extra.length)return '含不允許的欄位：'+extra.join(', ');
+ if(!PAYLOAD_KEYS[e.type])return '未註冊的事件類型 '+e.type;let p=e.payload;if(!p||typeof p!=='object')return '缺少 payload';let bad=Object.keys(p).filter(k=>!PAYLOAD_KEYS[e.type].includes(k));if(bad.length)return 'payload 含不允許的欄位：'+bad.join(', ');
+ let tid=e.targetId==null?null:e.targetId,ally=id=>save.roster.some(a=>a.id===id&&a.kind==='ally');
+ switch(e.type){case 'intel.record':if(typeof p.text!=='string'||!p.text.trim()||p.text.length>200)return 'text 須為 1–200 字';if(tid!==null&&!KNOWN_IDS.includes(tid))return '未知的 targetId';break;
+  case 'relationship.setStage':if(!ally(tid))return 'targetId 必須是名冊中的隊友';if(!['普通','信賴','親近'].includes(p.stage))return 'stage 只能是普通、信賴、親近';break;
+  case 'relationship.setFriction':if(!ally(tid))return 'targetId 必須是名冊中的隊友';if(typeof p.active!=='boolean')return 'active 須為 true／false';break;
+  case 'story.flag.set':{if(tid!==null)return 'targetId 必須為 null';let f=save.narrativeState.flagRegistry[p.flagId];if(!f)return '旗標未登錄：'+p.flagId;if(f.type==='boolean'&&typeof p.value!=='boolean')return '此旗標的值須為 true／false';if(f.type==='enum'&&!f.values.includes(p.value))return '此旗標的值須為 '+f.values.join('、');break}
+  case 'narrative.condition.set':if(!KNOWN_IDS.includes(tid)&&!save.roster.some(a=>a.id===tid))return '未知的角色 '+tid;if(typeof p.conditionId!=='string'||!/^[A-Za-z0-9-]{1,40}$/.test(p.conditionId))return 'conditionId 只能用英數與連字號';if(typeof p.label!=='string'||!p.label.trim()||p.label.length>40)return 'label 須為 1–40 字';if(p.active!==undefined&&typeof p.active!=='boolean')return 'active 須為 true／false';if(/HP|MP|AP|傷勢|重傷|輕傷|肢殘|倒地/.test(p.label))return 'label 不得描述戰鬥或傷勢狀態';break}
+ return null}
+function kjSay(m){if(window.__kjAuto){window.__kjAuto.msg=m}else alert(m)}
+function ingestReply(text){if(!save)return {status:'nosave',msg:'尚未載入戰役'};window.__kjAuto={msg:''};try{$('aiReply').value=text;parseEvents();return {status:'done',msg:window.__kjAuto.msg||''}}catch(e){return {status:'error',msg:String(e&&e.message||e)}}finally{window.__kjAuto=null}}
+function parseEvents(){let text=$('aiReply').value,bt=String.fromCharCode(96).repeat(3),re=new RegExp(bt+'\\s*kaiju-events\\s*([\\s\\S]*?)'+bt+'|~~~\\s*kaiju-events\\s*([\\s\\S]*?)~~~','i'),mt=text.match(re);
+ if(!mt){kjSay('沒有 kaiju-events 區塊：只保留為敘事，不改變存檔。');return}
+ let pack;try{pack=JSON.parse(mt[1]||mt[2])}catch(e){kjSay('事件 JSON 無法解析，未匯入任何候選。');return}
+ if(pack.protocol!=='kaiju.events/v1'){kjSay('事件協定版本不符（需要 kaiju.events/v1），未匯入。');return}
+ if(pack.campaignId!==save.campaignId){kjSay('事件屬於另一個戰役，未匯入。');return}
+ if(!Array.isArray(pack.events)){kjSay('缺少 events 陣列，未匯入。');return}
+ let snap=save.snapshotRegistry.find(x=>x.snapshotId===pack.snapshotId);if(!snap){kjSay('找不到對應的快照，未匯入。');return}if(snap.processed){kjSay('這份快照的回覆已處理過，重複貼上不會再套用。');return}
+ if(pack.sourceRevision!==snap.sourceRevision){kjSay('快照版本不一致，未匯入候選。');return}
+ let narrative=(text.slice(0,mt.index)+' '+text.slice(mt.index+mt[0].length)).trim(),hasNarr=narrative.length>0,stale=pack.sourceRevision<save.revision;
+ let seen=new Set(save.eventHistory.map(x=>x.id).concat(save.eventQueue.map(x=>x.id))),summary={auto:0,queued:0,rejected:0};
+ pack.events.forEach(e=>{let id=e&&e.id;let base={id:id||'(無 ID)',type:e&&e.type,snapshotId:pack.snapshotId,sourceRevision:pack.sourceRevision,processedAt:now()};
+  if(!id){save.eventHistory.push(Object.assign(base,{result:'驗證拒絕：缺少事件 ID'}));summary.rejected++;return}
+  if(seen.has(id)){save.eventHistory.push(Object.assign(base,{result:'重複未套用'}));summary.rejected++;return}seen.add(id);
+  if(/"(hp|mp|ap|damage|injury|xp|experience|level|equipment|weapon|reward|points|impact|reviewLevel|autoApply)"\s*:/i.test(JSON.stringify(e))){save.eventHistory.push(Object.assign(base,{result:'驗證拒絕：觸及面板保留的機械資料或審核級別'}));summary.rejected++;return}
+  let err=validateEvent(e);if(err){save.eventHistory.push(Object.assign(base,{result:'驗證拒絕：'+err}));summary.rejected++;return}
+  let quoteOk=!!(e.basis&&e.basis.quote&&hasNarr&&narrative.includes(e.basis.quote));
+  let reason=stale?'快照已過期，需確認':!e.basis||(!e.basis.quote&&!e.basis.note)?'缺少場景依據':!hasNarr?'只貼事件區塊，依據無法核對':!quoteOk?'依據摘句在敘事中找不到':'待玩家審核';
+  let candidate={id,type:e.type,targetId:e.targetId==null?null:e.targetId,payload:e.payload,basis:e.basis||{},sourceRevision:pack.sourceRevision,snapshotId:pack.snapshotId,reviewReason:reason};
+  if(e.type==='intel.record'&&autoEligible(candidate,quoteOk,stale)){applyEvent(candidate,e.payload,true);save.eventHistory.push(Object.assign(base,{result:'自動套用',payload:e.payload}));summary.auto++;return}
+  if(e.type==='intel.record'&&reason==='待玩家審核')candidate.reviewReason=save.settings.reviewPolicy==='review-all'?'全部審核政策':'可能涉及秘密、過長、重複或指定角色，需確認';
+  save.eventQueue.push(candidate);summary.queued++});
+ snap.processed=true;persist(summary.auto>0);render();kjSay('處理完成：自動套用 '+summary.auto+' 筆、待審核 '+summary.queued+' 筆、拒絕／重複 '+summary.rejected+' 筆。')}
+function autoEligible(c,quoteOk,stale){if(save.settings.reviewPolicy!=='auto-low'||c.targetId!==null||!quoteOk||stale)return false;let t=c.payload.text.trim();if(t.length>120)return false;if(save.narrativeState.intel.some(i=>i.text.trim()===t))return false;return !save.settings.sensitiveTerms.some(w=>w&&t.includes(w))}
+function applyEvent(e,p,auto){let ns=save.narrativeState;
+ if(e.type==='intel.record'){ns.intel.push({id:uid(),text:p.text.trim(),scope:'player',knownBy:e.targetId?[e.targetId]:[],sourceEventId:e.id,autoApplied:!!auto})}
+ if(e.type==='relationship.setStage'){(ns.relationships[e.targetId]=ns.relationships[e.targetId]||{stage:'普通',friction:false}).stage=p.stage}
+ if(e.type==='relationship.setFriction'){(ns.relationships[e.targetId]=ns.relationships[e.targetId]||{stage:'普通',friction:false}).friction=p.active}
+ if(e.type==='story.flag.set'){ns.flagValues[p.flagId]=p.value;ns.storyFlags=Object.keys(ns.flagValues).filter(f=>ns.flagValues[f]===true)}
+ if(e.type==='narrative.condition.set'){ns.nonCombatConditions=ns.nonCombatConditions.filter(c=>!(c.characterId===e.targetId&&c.conditionId===p.conditionId));if(p.active!==false)ns.nonCombatConditions.push({characterId:e.targetId,conditionId:p.conditionId,label:p.label})}}
+function applyQueued(i,action){let e=save.eventQueue[i];if(!e)return;let base={id:e.id,type:e.type,snapshotId:e.snapshotId,sourceRevision:e.sourceRevision,processedAt:now()};
+ if(action==='reject'){save.eventHistory.push(Object.assign(base,{result:'玩家拒絕'}));save.eventQueue.splice(i,1);persist(false);render();return}
+ let p=e.payload;if(action==='edit'){let raw=prompt('修改 payload（JSON）：',JSON.stringify(p));if(raw===null)return;try{p=JSON.parse(raw)}catch(err){alert('JSON 格式錯誤');return}}
+ let err=validateEvent({id:e.id,type:e.type,targetId:e.targetId,payload:p});if(err){alert('不合法：'+err);return}
+ if(e.sourceRevision<save.revision&&!confirm('這個候選來自較舊的戰役版本（修訂 '+e.sourceRevision+'，目前 '+save.revision+'）。確認狀態沒有衝突後仍要接受嗎？'))return;
+ applyEvent(e,p,false);save.eventHistory.push(Object.assign(base,{result:action==='edit'?'玩家修改後接受':'玩家接受',payload:p,original:action==='edit'?e.payload:undefined}));save.eventQueue.splice(i,1);persist(true);render()}
+function undoAuto(id){let ns=save.narrativeState,idx=ns.intel.findIndex(x=>x.sourceEventId===id&&x.autoApplied);if(idx<0){alert('找不到這筆自動套用的情報');return}if(!confirm('撤銷這筆情報？\n「'+ns.intel[idx].text+'」'))return;ns.intel.splice(idx,1);let h=save.eventHistory.find(x=>x.id===id&&x.result==='自動套用');if(h)h.undone=true;save.eventHistory.push({id,type:'intel.record',result:'玩家撤銷自動套用',processedAt:now()});persist(true);render()}
+function eventLabel(e){let p=e.payload||{};switch(e.type){case 'intel.record':return '情報：'+p.text+(e.targetId?'（'+nameOf(e.targetId)+'得知）':'');case 'relationship.setStage':return '關係：'+nameOf(e.targetId)+' → '+p.stage;case 'relationship.setFriction':return '摩擦：'+nameOf(e.targetId)+' → '+(p.active?'有摩擦':'解除');case 'story.flag.set':return '旗標：'+((save.narrativeState.flagRegistry[p.flagId]||{}).label||p.flagId)+' = '+p.value;case 'narrative.condition.set':return '狀態：'+nameOf(e.targetId)+'「'+p.label+'」'+(p.active===false?'移除':'');default:return e.type}}
+function renderQueue(){if(!save)return;let q=$('queue');q.innerHTML=save.eventQueue.length?'':'<p class="muted">目前沒有待審核事件。</p>';
+ save.eventQueue.forEach((e,i)=>{let d=document.createElement('div');d.className='event';d.innerHTML='<b>'+esc(eventLabel(e))+'</b><br><small class="muted">'+esc(e.reviewReason)+(e.basis&&e.basis.quote?' · 依據：「'+esc(e.basis.quote)+'」':'')+'</small><div class="row" style="margin-top:6px"><button data-a>接受</button><button data-e class="gold">修改後接受</button><button data-r class="danger">拒絕</button></div>';d.querySelector('[data-a]').onclick=()=>applyQueued(i,'accept');d.querySelector('[data-e]').onclick=()=>applyQueued(i,'edit');d.querySelector('[data-r]').onclick=()=>applyQueued(i,'reject');q.appendChild(d)});
+ let log=$('eventLog');log.innerHTML='';let items=save.eventHistory.slice(-15).reverse();if(!items.length){log.innerHTML='<p class="muted">尚無處理紀錄。</p>';return}
+ items.forEach(e=>{let pEl=document.createElement('p');pEl.innerHTML=esc(e.id)+' · '+esc(e.result)+(e.payload&&e.type?' · '+esc(eventLabel(e)):'');if(e.result==='自動套用'&&!e.undone){let b=document.createElement('button');b.className='ghost mini';b.textContent='撤銷';b.onclick=()=>undoAuto(e.id);pEl.append(' ',b)}log.appendChild(pEl)})}
+// ===== 事件繫結 =====
+fillTplSelect($('skillTpl'));fillFxSelect($('skillTpl'),$('skillFx'),$('skillFxWrap'));
+$('skillTpl').onchange=()=>fillFxSelect($('skillTpl'),$('skillFx'),$('skillFxWrap'));
+$('trTpl').onchange=()=>fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'));
+$('trAttr').onchange=()=>renderTrain();$('trSkill').onchange=()=>renderTrain();
+$('doAttr').onclick=trainAttr;$('doLearn').onclick=trainLearn;$('doUpgrade').onclick=trainUpgrade;
+$('origin').onchange=()=>{let id=$('origin').value;$('name').value=id==='custom'?'':CAST[id].name;$('name').readOnly=id!=='custom';$('weapon').disabled=id!=='custom';if(id!=='custom')$('weapon').value=CAST[id].w;stats=id==='custom'?{str:3,agi:3,sta:3,apt:3}:baseStats(id);renderStats();renderTeam()};
+$('role').onchange=renderTeam;$('team').onchange=e=>{if($('team').querySelectorAll('input:checked').length>3){e.target.checked=false;alert('每次任務最多 4 人，隊友最多選 3 人')}};
+$('create').onclick=newCampaign;$('load').onclick=load;$('backups').onclick=restoreBackup;$('export').onclick=exportJson;$('import').onclick=()=>$('file').click();$('file').onchange=()=>{if($('file').files[0])importJson($('file').files[0]);$('file').value=''};
+$('toprep').onclick=()=>showTab('prep');$('toTrain').onclick=()=>showTab('train');$('deploy').onclick=startMission;document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('move').onclick=()=>{mode='move';renderBattle()};$('attack').onclick=()=>{mode='attack';hint('attack');renderBattle()};$('acc').onclick=accButton;$('guard').onclick=guardAct;$('interact').onclick=interact;$('carry').onclick=carryAct;$('end').onclick=endTurn;$('extract').onclick=withdraw;
+$('board').onmouseleave=()=>{if(hoverCell){hoverCell=null;renderBattle()}};
+$('replayHints').onclick=()=>{if(!save)return;save.settings.tutorialSeen=[];persist(false);hintQueue=[];['deploy','move','attack','warn','cache','extract'].forEach(hint)};
+$('snapshot').onclick=makeSnapshot;$('copySnap').onclick=()=>{let t=$('snapshotOut');if(!t.value)return;t.select();try{navigator.clipboard.writeText(t.value).then(()=>toast('已複製快照'),()=>{document.execCommand('copy');toast('已複製快照')})}catch(e){document.execCommand('copy')}};
+$('parse').onclick=parseEvents;$('policy').onchange=()=>{if(!save)return;save.settings.reviewPolicy=$('policy').value;persist(false);toast('審核政策已更新')};
+$('attrs').onclick=e=>{let b=e.target.closest('[data-k]');if(!b)return;let used=Object.keys(stats).reduce((n,k)=>n+stats[k]-1,0),d=+b.dataset.d,k=b.dataset.k;if(d<0&&stats[k]>1||d>0&&stats[k]<4&&used<8)stats[k]+=d;renderStats()};
+renderStats();renderTeam();$('origin').onchange();
+// ===== LunaTalk 嵌入（由外層頁面載入時啟用）=====
+(function(){var K=null;try{K=window.parent!==window&&window.parent.KJ?window.parent.KJ:null}catch(e){}
+ if(!K)return;$('embedBar').classList.remove('hidden');
+ function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;toast(K.fill(t,send))}
+ $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);
+ window.kjStat=function(s){$('autoStat').textContent='自動接收 AI 事件：'+s};
+ window.kjIngest=function(t){let r=ingestReply(t);if(r.status!=='nosave')toast('已自動接收 AI 回覆'+(r.msg?'：'+r.msg:''));return r};
+})();
+})();
+
+</script></body></html>
