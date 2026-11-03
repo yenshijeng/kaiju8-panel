@@ -48,7 +48,7 @@ textarea{min-height:100px;resize:vertical}
 </style>
 </head>
 <body>
-<header><div class="brand">日本防衛隊<small>怪獸 8 號戰術 RPG · 前端垂直切片 · 存檔格式 1.3.0</small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><button id="load">載入</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
+<header><div class="brand">日本防衛隊<small>怪獸 8 號戰術 RPG · 前端垂直切片 · 存檔格式 1.4.0</small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><button id="load">載入</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
 <main>
 <section id="setup" class="card">
 <div class="eyebrow">CAMPAIGN SETUP</div><h2>建立防衛隊戰役</h2><p class="muted">選既有角色或建立新隊員。戰鬥屬性此後不可重分配，只能靠訓練提升。</p>
@@ -65,14 +65,14 @@ textarea{min-height:100px;resize:vertical}
 <button id="create" class="primary">建立戰役</button><div class="notice" style="margin-top:12px">存檔只寫入本機瀏覽器，並支援 JSON 匯出／匯入；任務前後自動保留最近 3 份備份。此版本尚無雲端同步。</div>
 </section>
 <section id="game" class="hidden">
-<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">SAGAMIHARA OPERATION</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">AI 交接</button></div></div></div>
-<section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><div class="row"><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
+<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">DEFENSE FORCE OPERATIONS</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">AI 交接</button></div></div></div>
+<section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><p id="dayLine" class="notice"></p><div class="row"><button id="restBtn">休養一日（恢復傷勢、刷新任務板）</button><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
 <section id="train" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">TRAINING</div><h2>訓練</h2><p id="gpLine" class="notice"></p><p class="muted">每項訓練花 1 點成長選擇點，確認後不能退回。未用的點數會保留。</p>
 <div class="box"><h4>屬性訓練</h4><div class="row"><select id="trAttr" style="width:auto"></select><button id="doAttr">提升 +1</button></div><p id="trAttrNote" class="muted"></p></div>
 <div class="box"><h4>學習新技能（最多記住 4 項）</h4><label>樣板</label><select id="trTpl"></select><div id="trFxWrap"><label>附加效果</label><select id="trFx"></select></div><label>技能名稱</label><input id="trName" maxlength="24" placeholder="自訂名稱"><div class="row" style="margin-top:8px"><button id="doLearn">學習</button></div><p id="trLearnNote" class="muted"></p></div>
 <div class="box"><h4>提升已知技能</h4><label>技能</label><select id="trSkill"></select><label>成長分支</label><select id="trBranch"></select><div class="row" style="margin-top:8px"><button id="doUpgrade">升級</button></div><p id="trUpNote" class="muted"></p></div>
 </div><div class="card"><h3>已知技能與出擊裝備（最多 3 項）</h3><div id="skillList"></div><h3>成長紀錄</h3><div id="gpHistory" class="log"></div></div></div></section>
-<section id="prep" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">MISSION BRIEFING</div><h2>相模原｜後方指定區域</h2><p>清理指定區域內的兩隻余獸。回收資料是可選目標；必須攜帶資料撤離才取得點數。</p><ul class="muted"><li>8×6 格街區；瓦礫阻擋移動與視線。</li><li>主要目標：擊倒余獸 A、余獸 B（各算一項子目標）。游蕩余獸不計入目標。</li><li>可選目標：回收資料並帶著撤離（+5 點、+10 經驗）。</li><li>撤離點靠近部署區；撤離不花 AP。</li><li>首次任務不預設倒數計時或增援波次。</li><li>結果：擊倒 2 隻後撤離＝成功；1 隻＝部分成功；0 隻但有回收、救援或擊倒＝有代價撤退；什麼都沒做或全隊倒地＝失敗。</li></ul><p class="notice">結束行動時剩下的 AP 保留到本輪結束，用來閃避（1 AP＋移動 1 AP）、硬接（1 AP）或反擊（2 AP）。</p><h3>出擊編組</h3><p id="ruleNote" class="notice"></p><div id="squadBox"></div><h3>出擊編制</h3><div id="prepParty" class="party"></div><p id="prepNote" class="muted"></p><button id="deploy" class="primary">確認並部署</button></div>
+<section id="prep" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">MISSION BRIEFING</div><h2>任務板｜戰役第 <span id="dayNo"></span> 日</h2><div id="boardBox"></div><div id="briefBox"></div><p class="notice">結束行動時剩下的 AP 保留到本輪結束，用來閃避（1 AP＋移動 1 AP）、硬接（1 AP）或反擊（2 AP）。</p><h3>出擊編組</h3><p id="ruleNote" class="notice"></p><div id="squadBox"></div><h3>出擊編制</h3><div id="prepParty" class="party"></div><p id="prepNote" class="muted"></p><button id="deploy" class="primary">確認並部署</button></div>
 <div class="card"><h3>總部申請</h3><p id="hqPts" class="notice"></p><div id="shop" class="shop"></div><h3 style="margin-top:14px">裝備配置</h3><p class="muted">任務準備時可換；部署後不能更換。已申請的裝備可在隊員間調換。</p><div id="loadouts"></div></div></div></section>
 <section id="battle" class="screen hidden"><div class="grid2"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
 <div class="row"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
@@ -83,7 +83,7 @@ textarea{min-height:100px;resize:vertical}
 (function(){
 'use strict';
 // ===== 常數 =====
-const SCHEMA='1.3.0',PREFIX='kaiju.tacticalRpg.campaign.v1.',INDEX='kaiju.tacticalRpg.index.v1',BACKUP='kaiju.tacticalRpg.backup.v1.';
+const SCHEMA='1.4.0',PREFIX='kaiju.tacticalRpg.campaign.v1.',INDEX='kaiju.tacticalRpg.index.v1',BACKUP='kaiju.tacticalRpg.backup.v1.';
 const LABELS={str:'力量',agi:'敏捷',sta:'體能',apt:'戰鬥適性'};
 const XP_TABLE=[0,80,180,300,440,600,780,980,1200,1440];
 const XP_BASE={'成功':40,'部分成功':30,'有代價撤退':20,'失敗':10};
@@ -112,6 +112,39 @@ const SENSITIVE=['變身','怪獸8號','怪獸 8 號','8號','正體','真實身
 const PAYLOAD_KEYS={'intel.record':['text'],'relationship.setStage':['stage'],'relationship.setFriction':['active'],'story.flag.set':['flagId','value'],'narrative.condition.set':['conditionId','label','active']};
 const KNOWN_IDS=['player','kafka','reno','kikoru','hoshina','mina','iharu','haruichi','aoi','narumi','isao','hikari','hasegawa','shinonome','okonogi','ogata'];
 const W=8,H=6;
+// ===== 任務板：模板、任務生成、戰役日數 =====
+const LAYOUTS={street:{name:'後方街區',walls:['3,2','3,3','4,2'],cache:[2,5],ext:[0,5],slots:[[5,1],[6,3],[3,5],[5,4],[6,0],[7,2],[4,4]]},
+ harbor:{name:'港灣倉庫區',walls:['2,1','2,2','5,1','5,2','5,3','3,4','4,4'],cache:[6,5],ext:[0,0],slots:[[4,0],[6,2],[7,4],[4,2],[6,0],[3,3],[7,1]]},
+ ridge:{name:'山路隘口',walls:['2,0','2,1','4,3','4,4','4,5','6,1','6,2'],cache:[6,5],ext:[0,5],slots:[[3,0],[5,0],[5,4],[7,3],[3,5],[6,3],[7,0]]}};
+const FOES={grunt:{name:'余獸',hp:45,agi:2,def:1,pow:12},swift:{name:'迅速余獸',hp:32,agi:3,def:0,pow:11},heavy:{name:'重型余獸',hp:70,agi:1,def:2,pow:14}};
+const TPLS={sweep:{title:'清掃余獸',mix:['grunt','grunt','grunt'],roam:'grunt'},swift:{title:'迅速突襲',mix:['swift','swift','grunt'],roam:'swift'},heavy:{title:'重型個體清除',mix:['heavy','grunt','grunt'],roam:'grunt'}};
+const DIFFS={easy:{label:'低風險',obj:2,roam:0,hp:.85,pw:.85,xp:.8,pts:4},normal:{label:'標準',obj:2,roam:1,hp:1,pw:1,xp:1,pts:5},hard:{label:'高風險',obj:3,roam:1,hp:1.15,pw:1.1,xp:1.3,pts:8}};
+function rngFor(seed){let h=2166136261;for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)}let a=h>>>0;return ()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr,r){arr=arr.slice();for(let i=arr.length-1;i>0;i--){let j=Math.floor(r()*(i+1)),t=arr[i];arr[i]=arr[j];arr[j]=t}return arr}
+function genSpec(lid,tid,dk,id,L,r){let ly=LAYOUTS[lid],tp=TPLS[tid],df=DIFFS[dk],hs=1+.08*(L-1),ps=1+.05*(L-1),slots=shuffle(ly.slots,r),en=[],n=0;
+ let mk=(type,obj)=>{let f=FOES[type],sl=slots[n],i=n;n++;let hp=Math.round(f.hp*df.hp*hs);return {id:'y'+n,name:obj?f.name+' '+'ABC'[i]:'游蕩'+f.name,kind:'enemy',type,x:sl[0],y:sl[1],hp,maxHp:hp,ap:1,maxAp:1,agi:f.agi,defense:f.def,power:Math.round(f.pow*df.pw*ps),objective:obj,status:{}}};
+ tp.mix.slice(0,df.obj).forEach(t=>en.push(mk(t,true)));for(let i=0;i<df.roam;i++)en.push(mk(tp.roam,false));
+ return {id,templateId:tid,layoutId:lid,key:lid+':'+tid,title:ly.name+'｜'+tp.title,diff:dk,diffLabel:df.label,rule:'standard',chapterId:'free-op',walls:ly.walls.slice(),cache:{x:ly.cache[0],y:ly.cache[1]},extraction:{x:ly.ext[0],y:ly.ext[1]},enemies:en,xpMult:df.xp,pts:df.pts}}
+function sagSpec(){return {id:'sagamihara-opening',templateId:'sagamihara-opening',layoutId:'street',key:'sagamihara-opening',title:'相模原後方指定區域',diff:'training',diffLabel:'序章',rule:'training',chapterId:'sagamihara-opening',walls:['3,2','3,3','4,2'],cache:{x:2,y:5},extraction:{x:0,y:5},xpMult:1,pts:5,
+ enemies:[{id:'y1',name:'余獸 A',kind:'enemy',type:'grunt',x:5,y:1,hp:45,maxHp:45,ap:1,maxAp:1,agi:2,defense:1,power:12,objective:true,status:{}},{id:'y2',name:'余獸 B',kind:'enemy',type:'grunt',x:6,y:3,hp:45,maxHp:45,ap:1,maxAp:1,agi:1,defense:1,power:12,objective:true,status:{}},{id:'y3',name:'游蕩余獸',kind:'enemy',type:'grunt',x:3,y:5,hp:38,maxHp:38,ap:1,maxAp:1,agi:2,defense:1,power:10,objective:false,status:{}}]}}
+let selId=null;
+function ensureBoard(){if(save.board&&save.board.day===save.campaign.day&&Array.isArray(save.board.missions)&&save.board.missions.length)return;
+ let r=rngFor(save.campaignId+':'+save.campaign.day),L=memberLevel('player'),combos=[];Object.keys(LAYOUTS).forEach(l=>Object.keys(TPLS).forEach(t=>combos.push([l,t])));combos=shuffle(combos,r);
+ let list=[];if(!save.progression.awarded.chapters.includes('sagamihara-opening'))list.push(sagSpec());
+ ['easy','normal','normal','hard'].forEach((dk,i)=>list.push(genSpec(combos[i][0],combos[i][1],dk,'op-'+save.campaign.day+'-'+(i+1),L,r)));
+ save.board={day:save.campaign.day,missions:list};selId=null}
+function selSpec(){ensureBoard();let b=save.board.missions;return b.find(x=>x.id===selId)||b[0]}
+function repFactor(key){let c=save.missionHistory.slice(-6).filter(h=>(h.key||h.chapterId)===key).length;return Math.max(.4,1-.2*c)}
+function renderBoard(){if(!save)return;let sp=selSpec(),rule=ruleOf(sp.rule),rep=repFactor(sp.key),objs=sp.enemies.filter(e=>e.objective);
+ $('dayNo').textContent=save.campaign.day;
+ $('boardBox').innerHTML='<div class="row" style="flex-wrap:wrap;gap:6px">'+save.board.missions.map(x=>'<button class="mini'+(x.id===sp.id?' primary':'')+'" data-pick="'+x.id+'">'+esc(x.title)+'<br><small>'+esc(x.diffLabel)+'</small></button>').join('')+'</div>';
+ $('boardBox').querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{selId=b.dataset.pick;render()});
+ let tp=sp.key==='sagamihara-opening'?'序章任務。':'';
+ $('briefBox').innerHTML='<h3>'+esc(sp.title)+'</h3><p class="muted">'+tp+esc(rule.label)+'（出擊等級上限 Lv'+rule.cap+'）</p><ul class="muted"><li>8×6 格；瓦礫阻擋移動與視線。</li><li>主要目標：擊倒 '+objs.length+' 隻指定怪獸（'+esc(objs.map(e=>e.name).join('、'))+'）。游蕩個體不計入目標。</li><li>可選目標：回收資料並帶著撤離（+'+Math.max(1,Math.round(sp.pts*rep))+' 點、+10 經驗）。</li><li>撤離點在第 '+(sp.extraction.x+1)+','+(sp.extraction.y+1)+' 格；撤離不花 AP。</li><li>結果：擊倒全部指定目標後撤離＝成功；部分擊倒＝部分成功；有回收、救援或擊倒＝有代價撤退；什麼都沒做或全隊倒地＝失敗。</li><li>經驗倍率 ×'+(sp.xpMult*rep).toFixed(2)+(rep<1?'（近期重複同類任務，獎勵遞減）':'')+'；完成後戰役日數 +1。</li></ul>'}
+function restDay(){if(!save)return;if(M()&&M().phase==='battle'){toast('任務進行中不能休養');return}
+ let ch=[];save.roster.forEach(r=>{let t=r.injury&&r.injury.type;if(t==='heavy'){r.injury={type:'heavy-recovering',label:injuryText({type:'heavy-recovering'})};ch.push(r.name+'：重傷→恢復中')}else if(t){r.injury=null;ch.push(r.name+'：傷勢痊癒')}recalcMember(r);r.hp=r.maxHp;r.mp=r.maxMp});
+ save.campaign.day++;save.board=null;save.narrativeState.timeMarker='第 '+save.campaign.day+' 日　整備中';save.narrativeState.locationId='base';persist(true);render();toast('休養一日（第 '+save.campaign.day+' 日）'+(ch.length?'：'+ch.join('、'):'；任務板已刷新'))}
+
 // ===== 工具 =====
 const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(16).slice(2),now=()=>new Date().toISOString();
 const clone=x=>JSON.parse(JSON.stringify(x));
@@ -137,7 +170,7 @@ function statsAtLevel(id,lv){let c=CAST[id],s=baseStats(id),pts=Math.floor(lv/2)
 function statsOf(id){return statsAtLevel(id,CAST[id].lv)}
 function memberLevel(id){let m=save.progression.members[id];return m?m.level:1}
 function ruleOf(key){return RULES[key]||RULES.training}
-function missionDef(){return MISSION_DEFS[save.campaign.chapterId]||MISSION_DEFS['sagamihara-opening']}
+function missionDef(){return selSpec()}
 function eligible(r,rule){if(r.id==='player')return {ok:true};let c=CAST[r.id];if(!c)return {ok:false,why:'未登錄角色'};if(!rule.tiers.includes(c.tier))return {ok:false,why:c.tier==='veteran'?'資深隊員不參加'+rule.label:c.tier==='support'?'後勤人員不上前線':'不符合編組'};return {ok:true}}
 function effLevel(r,rule){return r.id==='player'?memberLevel('player'):Math.min(memberLevel(r.id),rule.cap)}
 function squadIds(){return (save.squad||[]).filter(id=>save.roster.some(r=>r.id===id))}
@@ -168,12 +201,12 @@ function newCampaign(){let origin=$('origin').value,name=$('name').value.trim()|
  let roster=[p].concat(allyIds.map(mkAlly));
  let loadouts={player:{weapon:origin==='custom'?$('weapon').value:CAST[origin].w,armor:'standard',accessory:null}};allyIds.forEach(id=>loadouts[id]={weapon:CAST[id].w,armor:'standard',accessory:null});
  let members={};roster.forEach(r=>{let lv=r.id==='player'?1:CAST[r.id].lv;members[r.id]={level:lv,xp:XP_TABLE[lv-1]}});
- let t=now();save={schemaVersion:SCHEMA,campaignId:uid(),revision:0,createdAt:t,savedAt:t,campaign:{name:p.name+' 的防衛隊戰役',chapterId:'sagamihara-opening',phase:'mission_prep',missionCount:0},
+ let t=now();save={schemaVersion:SCHEMA,campaignId:uid(),revision:0,createdAt:t,savedAt:t,campaign:{name:p.name+' 的防衛隊戰役',chapterId:'sagamihara-opening',phase:'mission_prep',missionCount:0,day:1,stage:'prologue'},
   playerCharacter:Object.assign(clone(p),{description:origin==='custom'?$('bio').value.trim():'選擇的既有角色，使用原型暫定戰鬥屬性',skills:[skill],equippedSkillIds:[skill.id],customSkill:{name:skill.name,apCost:skill.apCost,mpCost:skill.mpCost,power:skill.power}}),
   roster:roster,squad:ids.slice(),progression:{level:1,xp:0,nextXp:XP_TABLE[1],recoveryPoints:0,members:members,growthPoints:{available:0,history:[]},awarded:{chapters:[],milestones:[]}},
   equipment:{standardLoadout:true,catalogVersion:1,owned:[],loadouts:loadouts},currentMission:null,
   narrativeState:{chapterId:'sagamihara-opening',locationId:'briefing',timeMarker:'相模原作戰前',relationships:{},flagRegistry:clone(FLAG_REGISTRY),storyFlags:[],flagValues:{},allowedFlagIds:Object.keys(FLAG_REGISTRY),intel:[],nonCombatConditions:[]},
-  snapshotRegistry:[],eventQueue:[],eventHistory:[],missionHistory:[],settings:{reviewPolicy:'auto-low',sensitiveTerms:SENSITIVE.slice(),tutorialSeen:[]},migrationLog:[]};
+  board:null,snapshotRegistry:[],eventQueue:[],eventHistory:[],missionHistory:[],settings:{reviewPolicy:'auto-low',sensitiveTerms:SENSITIVE.slice(),tutorialSeen:[]},migrationLog:[]};
  roster.slice(1).forEach(a=>save.narrativeState.relationships[a.id]={stage:'普通',friction:false});
  persist(true);enterGame('campaign')}
 // ===== 存檔、備份、遷移 =====
@@ -221,9 +254,12 @@ function migrate12to13(d,notes){d=clone(d);let n=[],pg=d.progression,have=new Se
  if(added.length)n.push('名冊補入其他隊員：'+added.join('、'));if(raised.length)n.push('依原作戰力調整等級：'+raised.join('、'));
  n.push('新增出擊編組（新人訓練任務限新人，最多 3 人）：'+squad.map(id=>CAST[id].name).join('、')+(old?'；資深隊員保留在名冊，之後的一般任務才能編入':''));
  n.forEach(x=>notes.push(x));d.migrationLog=(d.migrationLog||[]).concat([{from:'1.2.0',to:'1.3.0',at:now(),notes:n}]);d.schemaVersion='1.3.0';return d}
-function migrate(d){let v=verParts(d.schemaVersion);if(!v)throw Error('缺少或無法辨識 schemaVersion');if(v[0]!==1)throw Error('不支援的主版本 '+d.schemaVersion);if(v[1]>3)throw Error('存檔版本 '+d.schemaVersion+' 比此面板新，請使用較新版面板');
+function migrate13to14(d,notes){d=clone(d);let n=['新增戰役日數（第 '+(1+(d.campaign.missionCount||0))+' 日）與任務板；之後可反覆接一般任務練功，休養會推進日期'];d.campaign.day=1+(d.campaign.missionCount||0);d.campaign.stage='prologue';d.board=null;
+ d.missionHistory=(d.missionHistory||[]).map(h=>Object.assign({key:h.chapterId||'sagamihara-opening'},h));
+ n.forEach(x=>notes.push(x));d.migrationLog=(d.migrationLog||[]).concat([{from:'1.3.0',to:'1.4.0',at:now(),notes:n}]);d.schemaVersion='1.4.0';return d}
+function migrate(d){let v=verParts(d.schemaVersion);if(!v)throw Error('缺少或無法辨識 schemaVersion');if(v[0]!==1)throw Error('不支援的主版本 '+d.schemaVersion);if(v[1]>4)throw Error('存檔版本 '+d.schemaVersion+' 比此面板新，請使用較新版面板');
  if(!d.campaignId||!Array.isArray(d.roster)||!d.roster.some(r=>r.id==='player'))throw Error('缺少 campaignId 或名冊');
- let notes=[];if(v[1]===0)d=migrate10to11(d,notes);if(verParts(d.schemaVersion)[1]===1)d=migrate11to12(d,notes);if(verParts(d.schemaVersion)[1]===2)d=migrate12to13(d,notes);return {data:d,notes}}
+ let notes=[];if(v[1]===0)d=migrate10to11(d,notes);if(verParts(d.schemaVersion)[1]===1)d=migrate11to12(d,notes);if(verParts(d.schemaVersion)[1]===2)d=migrate12to13(d,notes);if(verParts(d.schemaVersion)[1]===3)d=migrate13to14(d,notes);return {data:d,notes}}
 function adopt(d,label){let r,from=d.schemaVersion;try{r=migrate(d)}catch(e){alert(label+'失敗：'+e.message);return false}
  if(r.notes.length&&!confirm('此存檔為 '+from+'，將遷移為 '+SCHEMA+'：\n\n・'+r.notes.join('\n・')+'\n\n確認後先備份原檔再寫入。'))return false;
  stopTimers();save=r.data;(save.roster||[]).forEach(a=>{if(a.kind==='ally'&&CAST[a.id]&&CAST[a.id].name&&a.name!==CAST[a.id].name)a.name=CAST[a.id].name});if(r.notes.length)backupNow('遷移前（'+from+'）');persist(false);let m=save.currentMission;enterGame(m&&m.phase==='battle'?'battle':'campaign');resumeBattle();return true}
@@ -244,8 +280,8 @@ function render(){if(!save)return;let p=rosterPlayer(),pg=save.progression,lo=lo
  $('bioText').innerHTML=esc(save.playerCharacter.description||'')+'<br>主武裝：'+esc(WEAPONS[lo.weapon].name)+'　防護：'+esc(ARMORS[lo.armor].name)+(lo.accessory?'　輔助：'+esc(ACCS[lo.accessory].name):'')+'<br>出擊技能：'+(equippedSkills().map(s=>esc(s.name)+'（'+esc(skillLine(s))+'）').join('、')||'無');
  $('injury').textContent='傷勢：'+injuryText(p.injury);
  $('growth').textContent='成長選擇點：'+pg.growthPoints.available+(pg.growthPoints.available?'，可到「訓練」使用':'');
- $('party').innerHTML=save.roster.map(a=>memberCard(a,false)).join('');$('prepParty').innerHTML=save.roster.filter(a=>a.id==='player'||squadIds().includes(a.id)).map(a=>memberCard(a,false)).join('');renderSquad();
- $('prepNote').textContent='玩家只操作自己的角色。'+(pg.awarded.chapters.includes('sagamihara-opening')?' 此任務已完成過：可以再次出擊演練，經驗照常結算，但篇章成長點不再發放。':'');
+ $('party').innerHTML=save.roster.map(a=>memberCard(a,false)).join('');$('prepParty').innerHTML=save.roster.filter(a=>a.id==='player'||squadIds().includes(a.id)).map(a=>memberCard(a,false)).join('');renderBoard();renderSquad();
+ $('prepNote').textContent='玩家只操作自己的角色。';$('dayLine').textContent='戰役第 '+save.campaign.day+' 日｜每次任務與休養各推進 1 日';
  $('score').textContent='回收點數：'+pg.recoveryPoints;
  let last=save.missionHistory[save.missionHistory.length-1];
  $('debrief').innerHTML=last?'<div class="eyebrow">最近任務結算</div><div class="result">'+esc(last.result)+'</div><p class="muted">'+esc(last.summary)+'</p><div class="kv"><span>主要目標</span><span>'+((last.objectives&&last.objectives.subObjectives)||[]).map(o=>(o.done?'✅':'⬜')+esc(o.label)).join('　')+'</span><span>可選目標</span><span>'+((last.objectives&&last.objectives.optional)||[]).map(o=>(o.done?'✅':'⬜')+esc(o.label)).join('　')+'</span><span>經驗</span><span>'+Object.keys(last.xpByMember||{}).map(k=>esc(nameOf(k))+' +'+last.xpByMember[k]).join('、')+'</span><span>回收點數</span><span>+'+last.recoveryPoints+'</span><span>傷勢</span><span>'+(Object.keys(last.injuries||{}).filter(k=>last.injuries[k]).map(k=>esc(nameOf(k))+'：'+esc(injuryText({type:last.injuries[k]}))).join('；')||'無')+'</span>'+((last.growthAwards||[]).length?'<span>成長點</span><span>'+last.growthAwards.map(g=>esc(g.label)).join('、')+'</span>':'')+'</div><hr style="border-color:#294251">':'';
@@ -316,17 +352,16 @@ function skillById(id){return knownSkills().find(s=>s.id===id)}
 function currentSkill(){return mode.startsWith('skill:')?skillById(mode.slice(6)):null}
 function skillMp(p,s){let mp=s.mpCost;if(p.capacitorArmed)mp=Math.max(5,mp-5);return mp}
 // ===== 戰鬥：開始與回合 =====
-function startMission(){if(M()&&M().phase==='battle'){alert('目前任務尚未結束');return}let def=missionDef(),rule=ruleOf(def.rule),sc=squadCheck(rule);if(!sc.ok){alert(sc.msg);return}backupNow('任務開始前');stopTimers();
+function startMission(){if(M()&&M().phase==='battle'){alert('目前任務尚未結束');return}let def=selSpec(),rule=ruleOf(def.rule),sc=squadCheck(rule);if(!sc.ok){alert(sc.msg);return}backupNow('任務開始前');stopTimers();
  let pos=[[0,2],[0,1],[0,3],[1,2]];
  let units=[rosterPlayer()].concat(squadIds().map(id=>save.roster.find(r=>r.id===id)));
  let actors=units.map((r,i)=>{let a=clone(r),lo=loadout(r.id),lv=effLevel(r,rule);if(r.id!=='player'&&CAST[r.id])a.stats=statsAtLevel(r.id,lv);a.effLv=lv;a.x=pos[i][0];a.y=pos[i][1];a.weapon=lo.weapon;a.armor=lo.armor;a.accessory=lo.accessory;a.accUsed=false;a.freeDodge=lo.armor==='mobility';a.defense=ARMORS[lo.armor].def;a.maxHp=baseHp(a.stats,lv);a.maxMp=baseMp(a.stats,lv);a.downed=false;a.wasDowned=false;a.guard=false;a.damagePenalty=1;a.startInjury=r.injury?r.injury.type:null;
   let inj=a.startInjury;if(inj==='heavy'){a.maxHp=Math.floor(a.maxHp*.75);a.hp=a.maxHp}else if(inj==='light'||inj==='heavy-recovering')a.hp=Math.floor(a.maxHp*.8);else a.hp=a.maxHp;
   if(inj==='limb-leg'){a.stats.agi=Math.max(1,a.stats.agi-2);a.maxAp=Math.max(1,apFor(a.stats.agi)-1)}else a.maxAp=apFor(a.stats.agi);if(inj==='limb-arm')a.damagePenalty=.8;a.mp=a.maxMp;a.ap=a.maxAp;return a});
- save.currentMission={id:uid(),title:def.title,chapterId:'sagamihara-opening',rule:{key:def.rule,label:rule.label,cap:rule.cap},phase:'battle',round:0,width:W,height:H,actors:actors,
-  enemies:[{id:'y1',name:'余獸 A',kind:'enemy',x:5,y:1,hp:45,maxHp:45,ap:1,maxAp:1,agi:2,defense:1,power:12,objective:true,status:{}},{id:'y2',name:'余獸 B',kind:'enemy',x:6,y:3,hp:45,maxHp:45,ap:1,maxAp:1,agi:1,defense:1,power:12,objective:true,status:{}},{id:'y3',name:'游蕩余獸',kind:'enemy',x:3,y:5,hp:38,maxHp:38,ap:1,maxAp:1,agi:2,defense:1,power:10,objective:false,status:{}}],
-  walls:['3,2','3,3','4,2'],cache:{x:2,y:5,recovered:false},extraction:{x:0,y:5},carryingIntel:false,rescued:[],kills:0,log:[],intent:{},order:[],orderIndex:0,activeActorId:null,equippedSkillIds:(save.playerCharacter.equippedSkillIds||[]).slice()};
- save.campaign.phase='battle';save.campaign.missionCount++;save.narrativeState.timeMarker='相模原作戰中';save.narrativeState.locationId='sagamihara';
- say('任務開始（'+rule.label+'）。清理指定區域兩隻余獸；游蕩余獸不計入主要目標。');actors.forEach(a=>{if(a.id!=='player'&&a.effLv<memberLevel(a.id))say(a.name+' 依訓練規定限制出力：Lv'+memberLevel(a.id)+' → Lv'+a.effLv+'。')});showTab('battle');hint('deploy');startRound()}
+ save.currentMission={id:uid(),title:def.title,chapterId:def.chapterId,spec:{id:def.id,key:def.key,templateId:def.templateId,diff:def.diff,xpMult:def.xpMult,pts:def.pts,day:save.campaign.day},rule:{key:def.rule,label:rule.label,cap:rule.cap},phase:'battle',round:0,width:W,height:H,actors:actors,
+  enemies:clone(def.enemies),walls:def.walls.slice(),cache:{x:def.cache.x,y:def.cache.y,recovered:false},extraction:{x:def.extraction.x,y:def.extraction.y},carryingIntel:false,rescued:[],kills:0,log:[],intent:{},order:[],orderIndex:0,activeActorId:null,equippedSkillIds:(save.playerCharacter.equippedSkillIds||[]).slice()};
+ save.campaign.phase='battle';save.campaign.missionCount++;save.narrativeState.timeMarker=def.chapterId==='sagamihara-opening'?'相模原作戰中':'第 '+save.campaign.day+' 日　出擊中';save.narrativeState.locationId=def.chapterId==='sagamihara-opening'?'sagamihara':'field';
+ say('任務開始：'+def.title+'（'+rule.label+'）。擊倒 '+def.enemies.filter(e=>e.objective).length+' 隻指定怪獸；游蕩個體不計入主要目標。');actors.forEach(a=>{if(a.id!=='player'&&a.effLv<memberLevel(a.id))say(a.name+' 依訓練規定限制出力：Lv'+memberLevel(a.id)+' → Lv'+a.effLv+'。')});showTab('battle');hint('deploy');startRound()}
 function planIntents(){let m=M();m.intent={};m.enemies.forEach(e=>{if(e.hp<=0)return;let t=m.actors.filter(standing).sort((a,b)=>dist(e,a)-dist(e,b))[0];if(t&&dist(e,t)<=1)m.intent[e.id]={targetId:t.id,x:t.x,y:t.y}})}
 function agiOf(a){return a.stats?a.stats.agi:a.agi||1}
 function startRound(){let m=M();if(!m||m.phase!=='battle')return;m.round++;waitingPlayer=false;
@@ -449,18 +484,18 @@ function doWithdraw(){let m=M();$('wdBox').classList.add('hidden');if(!m||m.phas
 // ===== 結算 =====
 function finish(result,summary){let m=M();if(!m||m.phase!=='battle')return;stopTimers();backupNow('任務結算前');
  let p=m.actors[0],intelOk=m.carryingIntel&&standing(p)&&summary!=='全隊倒地';
- let pts=intelOk?5:0,xp=Math.min(60,XP_BASE[result]+(intelOk?10:0));
+ let sp=m.spec||{key:'sagamihara-opening',xpMult:1,pts:5},rf=repFactor(sp.key),pts=intelOk?Math.max(1,Math.round(sp.pts*rf)):0,xp=Math.min(90,Math.max(5,Math.round((XP_BASE[result]+(intelOk?10:0))*sp.xpMult*rf)));
  let pg=save.progression,xpBy={},injuries={},growth=[];
  m.actors.forEach(b=>{let r=save.roster.find(x=>x.id===b.id);if(!r)return;let mem=pg.members[b.id]||(pg.members[b.id]={level:1,xp:0});let before=mem.level;mem.xp+=xp;mem.level=levelFor(mem.xp);xpBy[b.id]=xp;
   if(mem.level>before){say(b.name+' 升到 Lv'+mem.level+'。');if(b.id==='player')for(let l=before+1;l<=mem.level;l++)if(l%2===0){pg.growthPoints.available++;let g={source:'level',amount:1,label:'升到 Lv'+l,at:now()};pg.growthPoints.history.push(g);growth.push(g)}}
   let inj=null;if(b.downed)inj='heavy';else if(b.hp<=b.maxHp*.25||b.wasDowned)inj='light';else if(b.startInjury==='heavy')inj='heavy-recovering';
   r.injury=inj?{type:inj,label:injuryText({type:inj})}:null;injuries[b.id]=inj;recalcMember(r);r.hp=Math.min(r.maxHp,Math.max(0,b.hp));r.mp=Math.min(r.maxMp,b.mp)});
  pg.recoveryPoints+=pts;
- if(!pg.awarded.chapters.includes(m.chapterId)){pg.awarded.chapters.push(m.chapterId);pg.growthPoints.available++;let g={source:'chapter',amount:1,label:'首次完成相模原任務',at:now()};pg.growthPoints.history.push(g);growth.push(g)}
- save.missionHistory.push({missionId:m.id,title:m.title,chapterId:m.chapterId,result,summary,completedAt:now(),
+ if(m.chapterId==='sagamihara-opening'&&!pg.awarded.chapters.includes(m.chapterId)){pg.awarded.chapters.push(m.chapterId);pg.growthPoints.available++;let g={source:'chapter',amount:1,label:'首次完成相模原任務',at:now()};pg.growthPoints.history.push(g);growth.push(g)}
+ save.missionHistory.push({missionId:m.id,title:m.title,chapterId:m.chapterId,key:sp.key,day:save.campaign.day,diff:sp.diff||null,repFactor:rf,result,summary,completedAt:now(),
   objectives:{main:objectivesDone()===objectivesTotal(),subObjectives:m.enemies.filter(e=>e.objective).map(e=>({id:e.id,label:'擊倒'+e.name,done:e.hp<=0})),optional:[{id:'intel',label:'帶回回收資料',done:intelOk}]},
   xp:xpBy.player||0,xpByMember:xpBy,recoveryPoints:pts,injuries,rescued:m.rescued.slice(),growthAwards:growth});
- save.currentMission=null;save.campaign.phase='mission_debrief';save.narrativeState.locationId='sagamihara-debrief';save.narrativeState.timeMarker='相模原任務結束後';
+ save.currentMission=null;save.campaign.phase='mission_debrief';save.campaign.day++;save.board=null;save.narrativeState.locationId=m.chapterId==='sagamihara-opening'?'sagamihara-debrief':'base';save.narrativeState.timeMarker=m.chapterId==='sagamihara-opening'?'相模原任務結束後':'第 '+save.campaign.day+' 日　任務結束後';
  persist(true);showTab('campaign');toast('任務結算：'+result)}
 // ===== 戰鬥畫面 =====
 function renderBattle(){let m=M();
@@ -512,7 +547,7 @@ function buildSnap(action){
  let flags=Object.keys(ns.flagValues).map(f=>(ns.flagRegistry[f]?ns.flagRegistry[f].label:f)+'：'+ns.flagValues[f]);
  let since=last?last.completedAt:save.createdAt,recent=save.progression.growthPoints.history.filter(h=>h.source==='spent'&&h.at>since).map(h=>h.label);
  let s={protocol:'kaiju.local/v1',event:'narration_request',snapshotId:uid(),campaignId:save.campaignId,sourceRevision:save.revision,createdAt:now(),
-  scene:{chapterId:save.campaign.chapterId,locationId:ns.locationId,timeMarker:ns.timeMarker,phase:save.campaign.phase,recentOutcome:m?'戰鬥進行中，第 '+m.round+' 回合':last?last.result+'：'+last.summary:'準備首次任務',recentTraining:recent},
+  scene:{chapterId:save.campaign.chapterId,day:save.campaign.day,locationId:ns.locationId,timeMarker:ns.timeMarker,phase:save.campaign.phase,recentOutcome:m?'戰鬥進行中，第 '+m.round+' 回合':last?last.result+'：'+last.summary:'準備首次任務',recentTraining:recent},
   playerCharacter:{id:'player',name:pr.name,identity:save.playerCharacter.role,level:save.progression.level,relevantCondition:injuryText(pr.injury),growthPointsAvailable:save.progression.growthPoints.available,loadout:ITEM_NAME(lo.weapon)+'、'+ITEM_NAME(lo.armor)+(lo.accessory?'、'+ITEM_NAME(lo.accessory):''),skills:equippedSkills().map(x=>x.name+'（'+SKILL_TPL[x.template].label+'）')},
   participants:save.roster.filter(a=>a.id!=='player'&&squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,role:'隊伍成員',tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id),relevantCondition:injuryText(a.injury),relationship:(ns.relationships[a.id]?ns.relationships[a.id].stage+(ns.relationships[a.id].friction?'（有摩擦）':''):'普通'),knownFacts:ns.intel.filter(i=>i.scope==='squad'||(i.knownBy||[]).includes(a.id)).map(i=>i.text)})),
   availableMembers:save.roster.filter(a=>a.id!=='player'&&!squadIds().includes(a.id)).map(a=>({id:a.id,name:a.name,tier:TIER_LABEL[CAST[a.id]?CAST[a.id].tier:'rookie'],level:memberLevel(a.id)})),
@@ -592,7 +627,7 @@ $('doAttr').onclick=trainAttr;$('doLearn').onclick=trainLearn;$('doUpgrade').onc
 $('origin').onchange=()=>{let id=$('origin').value;$('name').value=id==='custom'?'':CAST[id].name;$('name').readOnly=id!=='custom';$('weapon').disabled=id!=='custom';if(id!=='custom')$('weapon').value=CAST[id].w;stats=id==='custom'?{str:3,agi:3,sta:3,apt:3}:baseStats(id);renderStats();renderTeam()};
 $('role').onchange=renderTeam;$('team').onchange=e=>{if($('team').querySelectorAll('input:checked').length>3){e.target.checked=false;alert('每次任務最多 4 人，隊友最多選 3 人')}};
 $('create').onclick=newCampaign;$('load').onclick=load;$('backups').onclick=restoreBackup;$('export').onclick=exportJson;$('import').onclick=()=>$('file').click();$('file').onchange=()=>{if($('file').files[0])importJson($('file').files[0]);$('file').value=''};
-$('toprep').onclick=()=>showTab('prep');$('toTrain').onclick=()=>showTab('train');$('deploy').onclick=startMission;document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('restBtn').onclick=restDay;$('toprep').onclick=()=>showTab('prep');$('toTrain').onclick=()=>showTab('train');$('deploy').onclick=startMission;document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 $('move').onclick=()=>{mode='move';renderBattle()};$('attack').onclick=()=>{mode='attack';hint('attack');renderBattle()};$('acc').onclick=accButton;$('guard').onclick=guardAct;$('interact').onclick=interact;$('carry').onclick=carryAct;$('end').onclick=endTurn;$('extract').onclick=withdraw;
 $('board').onmouseleave=()=>{if(hoverCell){hoverCell=null;renderBattle()}};
 $('replayHints').onclick=()=>{if(!save)return;save.settings.tutorialSeen=[];persist(false);hintQueue=[];['deploy','move','attack','warn','cache','extract'].forEach(hint)};
