@@ -88,7 +88,7 @@ const LABELS={str:'力量',agi:'敏捷',sta:'體能',apt:'戰鬥適性'};
 const XP_TABLE=[0,80,180,300,440,600,780,980,1200,1440];
 const XP_BASE={'成功':40,'部分成功':30,'有代價撤退':20,'失敗':10};
 const CAST={kafka:{name:'日比野卡夫卡',s:[3,2,4,3],w:'rifle',tier:'rookie',lv:2,grow:['sta','str']},reno:{name:'市川雷諾',s:[2,4,2,4],w:'rifle',tier:'rookie',lv:2,grow:['apt','agi']},kikoru:{name:'四之宮奇可露',s:[4,4,2,2],w:'rifle',tier:'rookie',lv:9,grow:['str','agi']},mina:{name:'亞白米娜',s:[4,3,3,2],w:'rifle',tier:'veteran',lv:10,grow:['apt','str']},hoshina:{name:'保科宗四郎',s:[3,4,3,2],w:'blade',tier:'veteran',lv:9,grow:['agi','str']},iharu:{name:'古橋伊春',s:[4,3,2,3],w:'rifle',tier:'rookie',lv:4,grow:['str','agi']},haruichi:{name:'出雲春樹',s:[3,3,3,3],w:'rifle',tier:'rookie',lv:4,grow:['apt','agi']},aoi:{name:'神樂木葵',s:[2,4,3,3],w:'rifle',tier:'rookie',lv:3,grow:['sta','str']},
- narumi:{name:'鳴海弦',s:[3,4,3,4],w:'rifle',tier:'veteran',lv:10,grow:['apt','agi']},hasegawa:{name:'長谷川榮治',s:[4,3,4,3],w:'rifle',tier:'veteran',lv:8,grow:['sta','str'],est:true},shinonome:{name:'東雲凜',s:[3,4,3,3],w:'rifle',tier:'veteran',lv:7,grow:['agi','str'],est:true},ogata:{name:'緒方重吾',s:[3,3,4,3],w:'rifle',tier:'veteran',lv:6,grow:['sta','apt'],est:true},okonogi:{name:'小此木心美',s:[1,2,2,5],w:'rifle',tier:'support',lv:1,grow:['apt'],est:true}};
+ narumi:{name:'鳴海弦',s:[3,4,3,4],w:'rifle',tier:'veteran',lv:10,grow:['apt','agi']},hasegawa:{name:'長谷川榮治',s:[4,3,4,3],w:'rifle',tier:'veteran',lv:8,grow:['sta','str'],est:true},shinonome:{name:'東雲凜',s:[3,4,3,3],w:'rifle',tier:'veteran',lv:7,grow:['agi','str'],est:true},ogata:{name:'緒方重悟',s:[3,3,4,3],w:'rifle',tier:'veteran',lv:6,grow:['sta','apt'],est:true},okonogi:{name:'小此木心美',s:[1,2,2,5],w:'rifle',tier:'support',lv:1,grow:['apt'],est:true}};
 const TIER_LABEL={rookie:'新人',veteran:'資深',support:'後勤'};
 const RULES={training:{label:'新人訓練任務',cap:3,tiers:['rookie'],desc:'限新人編組；出擊等級上限 Lv3，超過的隊員依訓練規定限制出力。玩家角色不受此限。'},standard:{label:'一般任務',cap:6,tiers:['rookie','veteran'],desc:'新人與資深隊員都可編入；出擊等級上限 Lv6。'},elite:{label:'高階任務',cap:10,tiers:['rookie','veteran'],desc:'不限等級的高階任務。'}};
 const MISSION_DEFS={'sagamihara-opening':{title:'相模原後方指定區域',rule:'training'}};
@@ -603,12 +603,12 @@ renderStats();renderTeam();$('origin').onchange();
 // ===== LunaTalk 嵌入（由外層頁面載入時啟用）=====
 (function(){if(window.parent===window){$('adv').open=true;return}$('embedBar').classList.remove('hidden');
  var P=window.parent;function post(m){try{P.postMessage(Object.assign({kj:1},m),'*')}catch(e){}}
- function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send})}
+ function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send});if(send)$('playerAction').value=''}
  $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);
  addEventListener('message',function(e){var d=e.data;if(!d||d.kj!==1||e.source!==P)return;
   if(d.t==='stat')$('autoStat').textContent='自動接收 AI 事件：'+d.s;
   else if(d.t==='fillres')toast(d.s);
-  else if(d.t==='consumed'){let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;persist(false)}armedId=null;arm()}
+  else if(d.t==='consumed'){$('playerAction').value='';let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;persist(false)}armedId=null;arm()}
   else if(d.t==='events'){var r;try{r=ingestReply(d.text)}catch(x){r={status:'error',msg:String(x)}}
    if(r.status!=='nosave')toast('已自動接收 AI 回覆'+(r.msg?'：'+r.msg:''));post({t:'ingested',id:d.id,status:r.status,msg:r.msg||''})}});
  var armedRev=null,armedCamp=null,armedId=null;
