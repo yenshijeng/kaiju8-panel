@@ -65,9 +65,10 @@ textarea{min-height:100px;resize:vertical}
 <label>身分面向</label><select id="role"><option>隊員</option><option>隊長</option><option>特殊適性</option></select>
 <label>外觀（自創角色用）</label><select id="gender"><option value="m">男性</option><option value="f">女性</option></select><label>入隊動機或背景</label><input id="bio" maxlength="100" placeholder="可留白">
 <label>主武裝（基本配發）</label><select id="weapon"><option value="rifle">標準突擊步槍：威力 6、射程 3、需視線</option><option value="blade">制式近戰刀：威力 6、相鄰</option></select>
-<label>起始技能樣板</label><select id="skillTpl"></select>
-<div id="skillFxWrap"><label>附加效果</label><select id="skillFx"></select></div>
-<label>技能名稱（只改名稱與演出，不改效果）</label><input id="skill" maxlength="24" value="破壞突擊">
+<h4 style="margin:14px 0 0">設計你的第一招</h4><label>① 選招式類型（決定射程與範圍）</label><select id="skillTpl"></select>
+<div id="skillFxWrap"><label>② 選特殊效果（可選，沒有也可以）</label><select id="skillFx"></select></div>
+<label>③ 幫招式取名（只是外觀，不影響數值）</label><input id="skill" maxlength="24" value="破壞突擊">
+<div id="skillPrev" class="notice" style="margin-top:8px"></div>
 </div><div><div class="row" style="justify-content:space-between"><h3>屬性</h3><b id="points">剩餘 0 點</b></div><div id="attrs"></div><p id="derived" class="muted"></p><p class="muted">四項各為 1，另分配 8 點，初始上限 4。HP／MP 公式和所有戰鬥數值均為待平衡的原型值。</p><label>出擊隊友（最多 3 人）</label><div id="team"></div><p id="teamHint" class="muted"></p></div></div>
 <button id="create" class="primary">建立戰役</button><div class="notice" style="margin-top:12px">存檔只寫入本機瀏覽器，並支援 JSON 匯出／匯入；任務前後自動保留最近 3 份備份。此版本尚無雲端同步。</div>
 </section>
@@ -76,7 +77,7 @@ textarea{min-height:100px;resize:vertical}
 <section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><p id="dayLine" class="notice"></p><div class="row"><button id="tourBtn" class="ghost">重看新手導覽</button><button id="restBtn">休養一日（恢復傷勢、補給 +4、刷新任務板）</button><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
 <section id="train" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">TRAINING</div><h2>訓練</h2><p id="gpLine" class="notice"></p><p class="muted">每項訓練花 1 點成長選擇點，確認後不能退回。未用的點數會保留。</p>
 <div class="box"><h4>屬性訓練</h4><div class="row"><select id="trAttr" style="width:auto"></select><button id="doAttr">提升 +1</button></div><p id="trAttrNote" class="muted"></p></div>
-<div class="box"><h4>學習新技能（最多記住 4 項）</h4><label>樣板</label><select id="trTpl"></select><div id="trFxWrap"><label>附加效果</label><select id="trFx"></select></div><label>技能名稱</label><input id="trName" maxlength="24" placeholder="自訂名稱"><div class="row" style="margin-top:8px"><button id="doLearn">學習</button></div><p id="trLearnNote" class="muted"></p></div>
+<div class="box"><h4>學習新技能（最多記住 4 項）</h4><label>① 選招式類型</label><select id="trTpl"></select><div id="trFxWrap"><label>② 選特殊效果（可選）</label><select id="trFx"></select></div><label>③ 幫招式取名</label><input id="trName" maxlength="24" placeholder="自訂名稱（可留空，用類型名稱）"><div id="trPrev" class="notice" style="margin-top:8px"></div><div class="row" style="margin-top:8px"><button id="doLearn">學習</button></div><p id="trLearnNote" class="muted"></p></div>
 <div class="box"><h4>提升已知技能</h4><label>技能</label><select id="trSkill"></select><label>成長分支</label><select id="trBranch"></select><div class="row" style="margin-top:8px"><button id="doUpgrade">升級</button></div><p id="trUpNote" class="muted"></p></div>
 <div class="box"><h4>解鎖專長（最多 2 項）</h4><select id="trSpec"></select><div class="row" style="margin-top:8px"><button id="doSpec">解鎖</button></div><p id="trSpecNote" class="muted"></p></div>
 </div><div class="card"><h3>已知技能與出擊裝備（最多 3 項）</h3><div id="skillList"></div><h3>成長紀錄</h3><div id="gpHistory" class="log"></div></div></div></section>
@@ -114,7 +115,8 @@ const SKILL_TPL={
  'field-aid':{label:'戰場急救',kind:'heal',attr:'apt',power:10,impact:0,apCost:2,mpCost:10,range:1,shape:'single',needsLos:false,effects:['heal'],desc:'自己或相鄰隊友恢復 10 HP，不能救起倒地者'},
  'finisher':{label:'破陣終結',kind:'damage',attr:'str',power:16,impact:4,apCost:3,mpCost:20,range:3,shape:'single',needsLos:true,effects:[null],adv:true,desc:'高階單體、射程 3、需視線（角色 Lv6）'},
  'wide-suppress':{label:'廣域壓制',kind:'area',attr:'apt',power:12,impact:4,apCost:3,mpCost:20,range:2,shape:'area3',needsLos:true,effects:['pin','expose'],adv:true,desc:'高階 3×3 範圍，中心 2 格內需視線；牽制或暴露（角色 Lv6）'}};
-const FX_LABEL={null:'無',break:'破甲（防禦 −1，至目標下次行動結束）',expose:'暴露（下一次命中 +4）',pin:'牽制（下次行動不能移動）',heal:'治療 10'};
+const FX_LABEL={null:'無特殊效果（只造成傷害）',break:'破甲：目標防禦 −1，直到它下次行動結束',expose:'暴露：目標下一次被命中，多受 4 點傷害',pin:'牽制：目標下次行動不能移動',heal:'治療：恢復 10 HP'};
+const TPL_PLAIN={'assault-strike':'貼身重擊，打相鄰的 1 個目標','pierce-shot':'遠距離單點射擊，射程 3，要看得到目標','suppress-shot':'射程 3，打中後讓目標下次不能移動','sweep':'十字範圍：中心加上下左右，不會傷到隊友','field-aid':'幫自己或相鄰隊友恢復 10 HP（救不起倒地的人）','finisher':'高階：威力很大的單點射擊，射程 3（角色 Lv6）','wide-suppress':'高階：3×3 大範圍，牽制或暴露（角色 Lv6）'};
 const FX_SHORT={break:'破甲',expose:'暴露',pin:'牽制',heal:'治療'};
 const BRANCH_LABEL={power:'威力 +3（三級 +2）',impact:'衝擊 +2（對大型敵人）',range:'距離 +1／十字擴大為 3×3',control:'牽制多持續一次行動',efficiency:'MP −5（最低 5）',stable:'每場首次命中大型目標額外衝擊 +1（三級 +2）'};
 const FLAG_REGISTRY={exam_crisis_resolved:{type:'boolean',label:'選拔考場危機已收束',chapter:'sagamihara-opening'},kafka_identity_known_to_player:{type:'boolean',label:'玩家確知卡夫卡能變身',chapter:'sagamihara-opening'},hoshina_recommendation_known:{type:'boolean',label:'玩家得知保科推薦卡夫卡',chapter:'sagamihara-opening'},sagamihara_debrief_status:{type:'enum',values:['pending','praised','reprimanded','questioned'],label:'相模原任務後的簡報評價',chapter:'sagamihara-opening'}};
@@ -228,7 +230,8 @@ function ownedCount(id){return save.equipment.owned.filter(x=>x===id).length}
 function assignedCount(id,exceptMember){let n=0;Object.keys(save.equipment.loadouts).forEach(m=>{if(m===exceptMember)return;let l=save.equipment.loadouts[m];if(l.weapon===id||l.armor===id||l.accessory===id)n++});return n}
 function isBase(id){return id==='rifle'||id==='blade'||id==='standard'}
 // ===== 建立戰役 =====
-function fillTplSelect(sel,train){sel.innerHTML=Object.keys(SKILL_TPL).filter(k=>train||!SKILL_TPL[k].adv).map(k=>'<option value="'+k+'">'+SKILL_TPL[k].label+'：'+SKILL_TPL[k].desc+'</option>').join('')}
+function fillTplSelect(sel,train){sel.innerHTML=Object.keys(SKILL_TPL).filter(k=>train||!SKILL_TPL[k].adv).map(k=>'<option value="'+k+'">'+SKILL_TPL[k].label+'：'+(TPL_PLAIN[k]||SKILL_TPL[k].desc)+'</option>').join('')}
+function skillPreview(tplSel,fxSel,nameInp,out){let tid=tplSel.value;if(!SKILL_TPL[tid]||!out)return;let t=SKILL_TPL[tid],fx=fxSel.value||null;if(t.effects.length<2)fx=t.effects[0];let sk=makeSkill(tid,(nameInp.value||'').trim()||t.label,fx,'preview');out.innerHTML='<b>完成後：'+esc(sk.name)+'</b><br>'+esc(skillLine(sk))+'<br>特殊效果：'+esc(FX_LABEL[fx]===undefined?FX_LABEL[null]:FX_LABEL[fx])}
 function fillFxSelect(tplSel,fxSel,wrap){let t=SKILL_TPL[tplSel.value];fxSel.innerHTML=t.effects.map(f=>'<option value="'+(f||'')+'">'+FX_LABEL[f]+'</option>').join('');wrap.classList.toggle('hidden',t.effects.length<2)}
 function renderStats(){let left=8;Object.keys(stats).forEach(k=>left-=stats[k]-1);let custom=$('origin').value==='custom';$('points').textContent=custom?'剩餘 '+left+' 點':'既有角色原型基準';$('attrs').innerHTML=Object.keys(stats).map(k=>'<div class="attr"><b>'+LABELS[k]+'</b><button data-k="'+k+'" data-d="-1">−</button><span>'+stats[k]+'</span><button data-k="'+k+'" data-d="1">＋</button></div>').join('');$('attrs').querySelectorAll('button').forEach(b=>b.disabled=!custom);$('derived').textContent='HP '+baseHp(stats,1)+' · MP '+baseMp(stats,1)+' · 每回合 AP '+apFor(stats.agi)+'（敏捷 3／6／9／10 各 +1）'}
 function squadFor(origin){return FIXED_SQUAD.filter(k=>k!==origin).slice(0,3)}
@@ -335,7 +338,7 @@ function renderTrain(){let gp=save.progression.growthPoints.available,lv=save.pr
  let keepAttr=$('trAttr').value;$('trAttr').innerHTML=Object.keys(LABELS).map(k=>'<option value="'+k+'" '+(p.stats[k]>=10?'disabled':'')+'>'+LABELS[k]+' '+p.stats[k]+' → '+Math.min(10,p.stats[k]+1)+'</option>').join('');if(keepAttr)$('trAttr').value=keepAttr;
  let k=$('trAttr').value,cur=p.stats[k],nextAp=k==='agi'&&apFor(cur+1)>apFor(cur);$('trAttrNote').textContent={str:'力量：普通攻擊與力量型技能的傷害。',agi:'敏捷：行動順序；3／6／9／10 時 AP +1。',sta:'體能：最大 HP +10。',apt:'戰鬥適性：最大 MP +10，戰鬥適性型技能的傷害。'}[k]+(nextAp?' 這次提升會讓每回合 AP +1。':'');
  $('doAttr').disabled=busy||gp<1||cur>=10;
- if(!$('trTpl').options.length){fillTplSelect($('trTpl'),true);fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'))}
+ if(!$('trTpl').options.length){fillTplSelect($('trTpl'),true);fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'))}if(window.__prevT)window.__prevT();
  let advSel=SKILL_TPL[$('trTpl').value]&&SKILL_TPL[$('trTpl').value].adv;$('doLearn').disabled=busy||gp<1||ks.length>=4||(advSel&&lv<6);$('trLearnNote').textContent=ks.length>=4?'已記住 4 項技能，不能再學新的。':'目前記住 '+ks.length+'／4 項。'+(advSel?(lv<6?'高階技能需要角色 Lv6。':'高階技能：3 AP／20 MP、衝擊 4。'):'高階技能（破陣終結、廣域壓制）角色 Lv6 起可學。');
  let keepSk=$('trSkill').value;$('trSkill').innerHTML=ks.map(s=>'<option value="'+s.id+'" '+(s.level>=Math.min(3,cap)?'disabled':'')+'>'+esc(s.name)+'（Lv'+s.level+'）</option>').join('');if(keepSk)$('trSkill').value=keepSk;
  let sel=ks.find(s=>s.id===$('trSkill').value&&s.level<cap);if(!sel){let firstOk=ks.find(s=>s.level<cap);if(firstOk){$('trSkill').value=firstOk.id;sel=firstOk}}
@@ -704,8 +707,11 @@ function renderQueue(){if(!save)return;let q=$('queue');q.innerHTML=save.eventQu
  items.forEach(e=>{let pEl=document.createElement('p');pEl.innerHTML=esc(e.id)+' · '+esc(e.result==='自動套用'?'自動記下':e.result)+(e.payload&&e.type?' · '+esc(eventLabel(e)):'');if(e.result==='自動套用'&&!e.undone){let b=document.createElement('button');b.className='ghost mini';b.textContent='撤銷';b.onclick=()=>undoAuto(e.id);pEl.append(' ',b)}log.appendChild(pEl)})}
 // ===== 事件繫結 =====
 fillTplSelect($('skillTpl'));fillFxSelect($('skillTpl'),$('skillFx'),$('skillFxWrap'));
-$('skillTpl').onchange=()=>fillFxSelect($('skillTpl'),$('skillFx'),$('skillFxWrap'));
-$('trTpl').onchange=()=>{fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'));renderTrain()};$('doSpec').onclick=trainSpec;
+window.__prevT=()=>skillPreview($('trTpl'),$('trFx'),$('trName'),$('trPrev'));
+const prevC=()=>skillPreview($('skillTpl'),$('skillFx'),$('skill'),$('skillPrev')),prevT=()=>skillPreview($('trTpl'),$('trFx'),$('trName'),$('trPrev'));
+$('skillTpl').onchange=()=>{fillFxSelect($('skillTpl'),$('skillFx'),$('skillFxWrap'));prevC()};$('skillFx').onchange=prevC;$('skill').oninput=prevC;prevC();
+$('trFx').onchange=prevT;$('trName').oninput=prevT;
+$('trTpl').onchange=()=>{fillFxSelect($('trTpl'),$('trFx'),$('trFxWrap'));renderTrain();prevT()};$('doSpec').onclick=trainSpec;
 $('trAttr').onchange=()=>renderTrain();$('trSkill').onchange=()=>renderTrain();
 $('doAttr').onclick=trainAttr;$('doLearn').onclick=trainLearn;$('doUpgrade').onclick=trainUpgrade;
 $('origin').onchange=()=>{let id=$('origin').value;$('name').value=id==='custom'?'':CAST[id].name;$('name').readOnly=id!=='custom';$('weapon').disabled=id!=='custom';if(id!=='custom')$('weapon').value=CAST[id].w;stats=id==='custom'?{str:3,agi:3,sta:3,apt:3}:baseStats(id);renderStats();renderTeam()};
