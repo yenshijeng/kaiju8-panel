@@ -43,6 +43,8 @@ textarea{min-height:100px;resize:vertical}
 .bar{height:6px;background:#253e4c;border-radius:9px;margin:4px 0}.bar i{display:block;height:100%;background:#70d39a}
 .log{max-height:220px;overflow:auto;padding:8px;background:#07131e;border:1px solid #294453;border-radius:8px}.log p{margin:4px 0;font-size:13px}
 .notice{border-left:3px solid var(--gold);padding:8px 10px;background:#dbb55712;color:#e6d5a8;border-radius:5px}
+#reaction,#wdBox,#hint{position:fixed;left:50%;width:min(620px,94vw);max-height:44vh;overflow:auto;box-shadow:0 10px 34px #000d;margin:0!important;transform:translateX(-50%);background:#0d1c2a;z-index:60}
+#hint{bottom:10px;z-index:55}#reaction{bottom:10px;z-index:62;border:1px solid #e0b659}#wdBox{top:50%;transform:translate(-50%,-50%);z-index:61;border:1px solid #e0b659}
 .storytext{white-space:pre-wrap;line-height:1.75;font-size:15px;max-height:62vh;overflow:auto;padding:4px 2px}#storyInput{min-height:130px}
 .hint{border-left:3px solid var(--cyan);padding:8px 10px;background:#67d4e014;border-radius:5px;margin-top:9px}
 .event{padding:10px;margin:8px 0;border:1px solid #415b6b;border-radius:8px}
@@ -53,10 +55,37 @@ textarea{min-height:100px;resize:vertical}
 .lo{display:grid;grid-template-columns:110px repeat(3,minmax(0,1fr));gap:6px;align-items:center;font-size:13px;margin:4px 0}
 .skill{border:1px solid #294251;border-radius:8px;padding:7px 9px;margin:5px 0;font-size:13px}
 @media(max-width:680px){header{align-items:flex-start;flex-direction:column;position:static}.grid2{grid-template-columns:1fr}.tile{height:46px;font-size:10px}.board{grid-template-columns:repeat(8,minmax(0,1fr));gap:3px}.card{padding:12px}.small,.st{font-size:8px}.statgrid{grid-template-columns:repeat(2,1fr)}.lo{grid-template-columns:1fr 1fr}}
+header{padding:7px max(12px,calc((100vw - 1200px)/2));gap:8px}
+.brand{font-size:15px}.brand small{font-size:12px;letter-spacing:0;color:var(--cyan)}
+header .tools{flex-wrap:nowrap}#saved{font-size:12px;max-width:34vw;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#menu{position:relative}#menu summary{list-style:none;cursor:pointer;background:#1a3b51;border:1px solid #4c7187;border-radius:8px;padding:6px 14px}#menu summary::-webkit-details-marker{display:none}
+.menuPop{position:absolute;right:0;top:calc(100% + 6px);width:200px;display:flex;flex-direction:column;gap:6px;background:#0d1c2a;border:1px solid var(--line);border-radius:10px;padding:10px;box-shadow:0 10px 30px #000c;z-index:70}
+.tabbar{position:sticky;top:56px;z-index:3;display:flex;gap:6px;margin:0 0 12px;padding:6px;background:#0b1a26f2;border:1px solid var(--line);border-radius:12px}
+.tabbar .tab{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;font-size:15px}.tabbar .tab i{font-style:normal}
+.tabbar .tab.active{background:#17677a;border-color:#58c6d4}
+.big{font-size:17px;padding:13px 20px;font-weight:700}.mainact{margin-top:10px}
+.fold>summary{cursor:pointer;font-weight:700;font-size:16px;margin-bottom:8px;list-style:none}.fold>summary::before{content:"▸ ";color:var(--cyan)}.fold[open]>summary::before{content:"▾ "}
+.bgrid{grid-template-columns:minmax(0,1fr) 340px;align-items:start}
+.bgrid>div:first-child .board{max-width:640px;margin:0 auto}
+.actbar{position:sticky;bottom:0;background:#0c1b28f7;padding:8px 6px;margin:8px -6px 0;border-top:1px solid var(--line);z-index:5;border-radius:0 0 10px 10px}
+.actbar button{min-height:40px}.bgrid .tile{height:52px}#hint,#reaction{bottom:104px}
+@media(max-width:900px){.bgrid{grid-template-columns:1fr}}
+@media(max-width:680px){
+header{position:sticky;flex-direction:row;align-items:center}
+.tabbar{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;border-radius:14px 14px 0 0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:50;flex-wrap:nowrap}
+.tabbar .tab{flex-direction:column;gap:0;font-size:12px;padding:6px 2px}.tabbar .tab i{font-size:18px}
+main{margin-top:10px;padding-bottom:96px}
+.actbar{position:fixed;left:0;right:0;bottom:62px;margin:0;border-radius:0;padding:6px 8px;flex-wrap:nowrap;overflow-x:auto;z-index:48}
+.actbar button{flex:0 0 auto;font-size:14px;padding:8px 11px}
+#battle{padding-bottom:70px}
+#reaction,#hint{bottom:126px}
+.big{width:100%}.mainact button{flex:1 1 100%}
+.menuPop{width:min(220px,70vw)}
+}
 </style>
 </head>
 <body>
-<header><div class="brand">日本防衛隊<small>怪獸 8 號戰術 RPG · 前端垂直切片 · 存檔格式 1.4.0</small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><button id="load">載入</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
+<header><div class="brand">怪獸 8 號戰術 RPG<small id="dayChip"></small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><details id="menu"><summary>選單</summary><div class="menuPop"><button id="load">載入戰役</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><button id="menuHandoff">AI 記錄與設定</button><button id="menuTour" class="ghost">重看新手導覽</button><div class="muted" style="font-size:12px;padding:4px 2px">存檔格式 1.4.0</div></div></details><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
 <main>
 <section id="setup" class="card">
 <div class="eyebrow">CAMPAIGN SETUP</div><h2>建立防衛隊戰役</h2><p class="muted">選既有角色或建立新隊員。戰鬥屬性此後不可重分配，只能靠訓練提升。</p>
@@ -74,8 +103,8 @@ textarea{min-height:100px;resize:vertical}
 <button id="create" class="primary">建立戰役</button><div class="notice" style="margin-top:12px">存檔只寫入本機瀏覽器，並支援 JSON 匯出／匯入；任務前後自動保留最近 3 份備份。此版本尚無雲端同步。</div>
 </section>
 <section id="game" class="hidden">
-<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">DEFENSE FORCE OPERATIONS</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab hidden" id="tabStory" data-tab="story">劇情</button><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">AI 記錄與設定</button></div></div></div>
-<section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><p id="dayLine" class="notice"></p><div class="row"><button id="tourBtn" class="ghost">重看新手導覽</button><button id="restBtn">休養一日（恢復傷勢、補給 +4、刷新任務板）</button><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
+<nav class="tabbar"><button class="tab hidden" id="tabStory" data-tab="story"><i>💬</i>劇情</button><button class="tab active" data-tab="campaign"><i>🏠</i>戰役</button><button class="tab" data-tab="train"><i>📈</i>訓練</button><button class="tab" data-tab="prep"><i>🎒</i>整備</button><button class="tab" data-tab="battle"><i>⚔</i>戰鬥</button><button class="tab hidden" data-tab="handoff">設定</button></nav><h2 id="title" class="hidden"></h2>
+<section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><p id="dayLine" class="notice"></p><div class="row mainact"><button id="toprep" class="primary big">選任務並出擊 ▶</button><button id="restBtn">休養一日（恢復傷勢、補給 +4）</button><button id="toTrain">前往訓練</button><button id="tourBtn" class="ghost hidden">重看新手導覽</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
 <section id="train" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">TRAINING</div><h2>訓練</h2><p id="gpLine" class="notice"></p><p class="muted">每項訓練花 1 點成長選擇點，確認後不能退回。未用的點數會保留。</p>
 <div class="box"><h4>屬性訓練</h4><div class="row"><select id="trAttr" style="width:auto"></select><button id="doAttr">提升 +1</button></div><p id="trAttrNote" class="muted"></p></div>
 <div class="box"><h4>學習新技能（最多記住 4 項）</h4><label>① 選招式類型</label><select id="trTpl"></select><div id="trFxWrap"><label>② 選特殊效果（可選）</label><select id="trFx"></select></div><label>③ 幫招式取名</label><input id="trName" maxlength="24" placeholder="自訂名稱（可留空，用類型名稱）"><div id="trPrev" class="notice" style="margin-top:8px"></div><div class="row" style="margin-top:8px"><button id="doLearn">學習</button></div><p id="trLearnNote" class="muted"></p></div>
@@ -84,9 +113,9 @@ textarea{min-height:100px;resize:vertical}
 </div><div class="card"><h3>已知技能與出擊裝備（最多 3 項）</h3><div id="skillList"></div><h3>成長紀錄</h3><div id="gpHistory" class="log"></div></div></div></section>
 <section id="prep" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">MISSION BRIEFING</div><h2>任務板｜戰役第 <span id="dayNo"></span> 日</h2><div id="boardBox"></div><div id="briefBox"></div><p class="notice">結束行動時剩下的 AP 保留到本輪結束，用來閃避（1 AP＋移動 1 AP）、硬接（1 AP）或反擊（2 AP）。</p><h3>出擊編組</h3><p id="ruleNote" class="notice"></p><div id="squadBox"></div><h3>出擊編制</h3><div id="prepParty" class="party"></div><p id="prepNote" class="muted"></p><button id="deploy" class="primary">確認並部署</button></div>
 <div class="card"><h3>總部申請</h3><p id="hqPts" class="notice"></p><div id="shop" class="shop"></div><h3 style="margin-top:14px">裝備配置</h3><p class="muted">任務準備時可換；部署後不能更換。已申請的裝備可在隊員間調換。</p><div id="loadouts"></div></div></div></section>
-<section id="battle" class="screen hidden"><div class="grid2"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
-<div class="row"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
-<div id="modeNote" class="muted" style="margin-top:6px;font-size:13px"></div><div id="reaction" class="notice hidden" style="margin-top:9px"></div><div id="wdBox" class="notice hidden" style="margin-top:9px"></div><div id="hint" class="hint hidden"></div><div class="row" style="margin-top:8px"><button id="replayHints" class="ghost">重看教學提示</button></div></div><div><div class="card"><h3>隊員狀態</h3><div id="battleParty" class="party"></div></div><div class="card"><h3>任務目標</h3><div id="objective"></div><h3>作戰紀錄</h3><div id="combatLog" class="log"></div></div></div></div></section>
+<section id="battle" class="screen hidden"><div class="grid2 bgrid"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
+<div class="row actbar" id="actBar"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
+<div id="modeNote" class="muted" style="margin-top:6px;font-size:13px"></div><div id="reaction" class="notice hidden" style="margin-top:9px"></div><div id="wdBox" class="notice hidden" style="margin-top:9px"></div><div id="hint" class="hint hidden"></div><div class="row" style="margin-top:8px"><button id="replayHints" class="ghost">重看教學提示</button></div></div><div><div class="card"><details class="fold" open id="partyFold"><summary>隊員狀態</summary><div id="battleParty" class="party"></div></details></div><div class="card"><h3>任務目標</h3><div id="objective"></div><details class="fold"><summary>作戰紀錄</summary><div id="combatLog" class="log"></div></details></div></div></div></section>
 <section id="story" class="screen hidden"><div class="grid2"><div class="card"><h3>最新劇情</h3><div id="storyStat" class="muted" style="margin-bottom:6px"></div><div id="storyText" class="storytext">（還沒有 AI 的回覆。先在右邊寫下你想做的事，按「送出給 AI」。）</div></div><div class="card"><h3>你要做什麼？</h3><p class="muted">寫下你的行動或想說的話，AI 會接著寫劇情。目前的進度（隊伍、結果）會自動一起傳給 AI。</p><textarea id="storyInput" placeholder="例如：我先問米娜隊長今天的任務重點。"></textarea><div class="row" style="margin-top:8px"><button id="storySend" class="primary">送出給 AI</button><button id="storyToChat" class="ghost">回聊天室看完整紀錄</button></div><div id="pendNote" style="margin-top:8px"></div><div class="muted" id="storyHint" style="margin-top:8px"></div></div></div></section>
 <section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>傳送目前進度給 AI</h3><p class="muted">AI 看不到你的存檔，每次要先把「目前進度」（角色、隊伍、結果）傳給它，它才能接著寫劇情。在聊天框直接打字送出，面板會自動附上，不必手動操作。</p><label>你的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">把目前進度填入聊天框</button> <button id="sendBtn">填入並送出</button><label style="display:block;margin-top:6px"><input type="checkbox" id="autoAttach"> 送出聊天時，自動把最新進度一起傳給 AI（建議保持勾選）</label><div class="muted" id="autoStat" style="margin-top:6px">AI 回覆記錄：待命</div></div><details id="adv" style="margin-top:8px"><summary>進階（手動複製進度資料）</summary><button id="snapshot" class="primary">產生資料</button> <button id="copySnap">複製</button><textarea id="snapshotOut" readonly></textarea></details></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（整段貼上即可；在 LunaTalk 內會自動讀取，不用貼）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">讀取 AI 回覆</button><label>AI 建議記錄的事（情報、關係等），怎麼處理？</label><select id="policy"><option value="auto-low">小情報自動記下（可撤銷），其他交我確認</option><option value="review-all">全部交我確認</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>等你確認的記錄</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
 </section></main>
@@ -218,7 +247,7 @@ function missionDef(){return selSpec()}
 function eligible(r,rule){if(r.id==='player')return {ok:true};let c=CAST[r.id];if(!c)return {ok:false,why:'未登錄角色'};if(!rule.tiers.includes(c.tier))return {ok:false,why:c.tier==='veteran'?'資深隊員不參加'+rule.label:c.tier==='support'?'後勤人員不上前線':'不符合編組'};return {ok:true}}
 function effLevel(r,rule){return r.id==='player'?memberLevel('player'):Math.min(memberLevel(r.id),rule.cap)}
 function squadIds(){return (save.squad||[]).filter(id=>save.roster.some(r=>r.id===id))}
-function squadCheck(rule){let ids=squadIds();if(ids.length>3)return {ok:false,msg:'出擊隊友最多 3 人'};for(let id of ids){let r=save.roster.find(x=>x.id===id),e=eligible(r,rule);if(!e.ok)return {ok:false,msg:r.name+'：'+e.why+'。請到「整備與簡報」調整出擊編組。'}}return {ok:true}}
+function squadCheck(rule){let ids=squadIds();if(ids.length>3)return {ok:false,msg:'出擊隊友最多 3 人'};for(let id of ids){let r=save.roster.find(x=>x.id===id),e=eligible(r,rule);if(!e.ok)return {ok:false,msg:r.name+'：'+e.why+'。請到「整備」調整出擊編組。'}}return {ok:true}}
 function mkMember(id,name,kind,s){let hp=baseHp(s,1),mp=baseMp(s,1),ap=apFor(s.agi);return {id,name,kind,stats:Object.assign({},s),maxHp:hp,hp,maxMp:mp,mp,maxAp:ap,defense:2,injury:null}}
 function mkAlly(id){let c=CAST[id],st=statsOf(id),m=mkMember(id,c.name,'ally',st);m.maxHp=m.hp=baseHp(st,c.lv);m.maxMp=m.mp=baseMp(st,c.lv);m.tier=c.tier;return m}
 function loadout(id){let l=save.equipment.loadouts[id];if(l)return l;return {weapon:id==='player'?'rifle':(CAST[id]?CAST[id].w:'rifle'),armor:'standard',accessory:null}}
@@ -320,7 +349,7 @@ function enterGame(tab){$('setup').classList.add('hidden');$('game').classList.r
 function showTab(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('hidden',x.id!==id));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));if(save)render()}
 function memberCard(a,battle){let maxAp=a.maxAp||1,cur=Number.isFinite(a.ap)?a.ap:maxAp,lo=battle?{weapon:a.weapon,armor:a.armor,accessory:a.accessory}:loadout(a.id),lv=save.progression.members[a.id]?save.progression.members[a.id].level:1,tag=CAST[a.id]&&a.kind==='ally'?TIER_LABEL[CAST[a.id].tier]+' ':'',lvt='Lv'+lv+(battle&&a.effLv&&a.effLv<lv?'→'+a.effLv:'');
  return '<div class="member'+(a.downed?' down':'')+'">'+unitImg(a,'av')+'<b>'+esc(a.name)+'</b> <small class="muted">'+tag+lvt+'</small><div class="bar"><i style="width:'+Math.max(0,Math.min(100,a.hp/a.maxHp*100))+'%"></i></div><small>HP '+a.hp+'/'+a.maxHp+' · MP '+a.mp+'/'+a.maxMp+(battle?' · AP '+cur+'/'+maxAp:' · AP '+maxAp)+'<br>'+esc(WEAPONS[lo.weapon].name)+' · 防禦 '+(battle?a.defense:ARMORS[lo.armor].def)+(lo.accessory?'<br>'+esc(ACCS[lo.accessory].name)+(battle&&a.accUsed?'（已用）':''):'')+(a.guard?'<br>守勢中':'')+(a.downed?'<br><b style="color:var(--red)">倒地</b>':'')+(!battle&&a.injury?'<br><span style="color:var(--gold)">'+esc(injuryText(a.injury))+'</span>':'')+'</small></div>'}
-function render(){if(!save)return;setTimeout(maybeTour,0);let p=rosterPlayer(),pg=save.progression,lo=loadout('player');$('title').textContent=save.campaign.name;$('pcname').textContent=p.name+' · '+save.playerCharacter.role;
+function render(){if(!save)return;setTimeout(maybeTour,0);let p=rosterPlayer(),pg=save.progression,lo=loadout('player');$('title').textContent=save.campaign.name;$('dayChip').textContent='第 '+save.campaign.day+' 日 · 補給 '+supply();$('pcname').textContent=p.name+' · '+save.playerCharacter.role;
  $('stats').innerHTML='<div class="stat">HP<b>'+p.maxHp+'</b></div><div class="stat">MP<b>'+p.maxMp+'</b></div><div class="stat">AP／回合<b>'+p.maxAp+'</b></div><div class="stat">等級<b>Lv'+pg.level+'</b><small class="muted">經驗 '+pg.xp+(pg.nextXp?'／'+pg.nextXp:'（滿級）')+'</small></div>'+Object.keys(LABELS).map(k=>'<div class="stat">'+LABELS[k]+'<b>'+p.stats[k]+'</b></div>').join('');
  $('bioText').innerHTML=esc(save.playerCharacter.description||'')+'<br>主武裝：'+esc(WEAPONS[lo.weapon].name)+'　防護：'+esc(ARMORS[lo.armor].name)+(lo.accessory?'　輔助：'+esc(ACCS[lo.accessory].name):'')+'<br>出擊技能：'+(equippedSkills().map(s=>esc(s.name)+'（'+esc(skillLine(s))+'）').join('、')||'無');
  $('injury').textContent='傷勢：'+injuryText(p.injury);
@@ -382,7 +411,7 @@ const TOUR=[
  {tab:'battle',t:'第一次出擊：先打教學任務',b:'任務板最上面的「教學任務」不花補給、不推進日數。照提示練一次：<b>移動 → 攻擊 → 回收資料 → 撤離</b>，大約三分鐘。'},
  {tab:'battle',t:'戰鬥怎麼玩',b:'輪到你時有幾點 <b>AP（行動點）</b>：移動、攻擊、技能都會花 AP。紅底格是敵人下一輪會打的位置，記得閃開。AP 用完或不想動了就按「結束行動」。'},
  {tab:'train',t:'訓練頁：變強的地方',b:'升級和一般任務會給<b>成長點</b>。用成長點加屬性、學新技能或選專長；打任務賺的<b>回收點數</b>可以申請裝備和補給。'},
- {tab:'prep',t:'整備與簡報：出任務前先看',b:'這裡選出擊隊友（最多 3 人）、換裝備、看任務目標。補給不夠時，先休養或申請補給。大約每 3 天要休養 1 天。'},
+ {tab:'prep',t:'整備：出任務前先看',b:'這裡選出擊隊友（最多 3 人）、換裝備、看任務目標。補給不夠時，先休養或申請補給。大約每 3 天要休養 1 天。'},
  {tab:'story',t:'劇情頁：和 AI 對話的地方',b:'AI 寫的劇情會顯示在這一頁。在右邊（手機在下面）寫下你要做什麼、說什麼，按「送出給 AI」就好，不用複製貼上，目前進度會自動一起傳過去。想看完整聊天紀錄，按「回聊天室」或上方的「回聊天」，再回來時按圓形按鈕就好。'},
  {tab:'handoff',t:'AI 記錄與設定',b:'AI 回覆裡的重要情報會自動記下；需要你確認的（例如關係變化）會放在這一頁，劇情頁也會提醒你。一般情況下不用動這裡。'}];
 let tourStep=-1;
@@ -588,7 +617,7 @@ function finish(result,summary){let m=M();if(!m||m.phase!=='battle')return;stopT
 // ===== 戰鬥畫面 =====
 function renderBattle(){let m=M();
  ['move','attack','acc','guard','interact','end','extract','carry'].forEach(id=>$(id).disabled=true);
- if(!m){$('round').textContent='尚未出擊';$('turn').textContent='到「整備與簡報」部署';$('board').innerHTML='';$('order').textContent='';$('battleParty').innerHTML='';$('objective').innerHTML='';$('combatLog').innerHTML='';$('skillBtns').innerHTML='';$('modeNote').textContent='';return}
+ if(!m){$('round').textContent='尚未出擊';$('turn').textContent='到「整備」部署';$('board').innerHTML='';$('order').textContent='';$('battleParty').innerHTML='';$('objective').innerHTML='';$('combatLog').innerHTML='';$('skillBtns').innerHTML='';$('modeNote').textContent='';return}
  let active=findUnit(m.activeActorId),p=m.actors[0],ready=playerReady(),w=weaponOf(p),cs=currentSkill(),eq=knownSkills().filter(s=>(m.equippedSkillIds||[]).includes(s.id));
  $('round').textContent='第 '+m.round+' 回合';
  $('turn').textContent=reaction?'選擇防禦反應':active?(active.kind==='player'?'你的行動 · AP '+p.ap+'/'+p.maxAp+' · MP '+p.mp:active.name+' 行動中'):'回合推進中';
@@ -720,7 +749,7 @@ $('doAttr').onclick=trainAttr;$('doLearn').onclick=trainLearn;$('doUpgrade').onc
 $('origin').onchange=()=>{let id=$('origin').value;$('name').value=id==='custom'?'':CAST[id].name;$('name').readOnly=id!=='custom';$('weapon').disabled=id!=='custom';if(id!=='custom')$('weapon').value=CAST[id].w;stats=id==='custom'?{str:3,agi:3,sta:3,apt:3}:baseStats(id);renderStats();renderTeam()};
 $('role').onchange=renderTeam;$('team').onchange=e=>{if($('team').querySelectorAll('input:checked').length>3){e.target.checked=false;alert('每次任務最多 4 人，隊友最多選 3 人')}};
 $('create').onclick=newCampaign;$('load').onclick=load;$('backups').onclick=restoreBackup;$('export').onclick=exportJson;$('import').onclick=()=>$('file').click();$('file').onchange=()=>{if($('file').files[0])importJson($('file').files[0]);$('file').value=''};
-$('tourBtn').onclick=()=>{if(save)tourOpen(0)};$('restBtn').onclick=restDay;$('toprep').onclick=()=>showTab('prep');$('toTrain').onclick=()=>showTab('train');$('deploy').onclick=startMission;document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$('tourBtn').onclick=$('menuTour').onclick=()=>{$('menu').open=false;if(save)tourOpen(0)};if(window.innerWidth<=680)$('partyFold').open=false;$('menuHandoff').onclick=()=>{$('menu').open=false;if(save)showTab('handoff')};$('restBtn').onclick=restDay;$('toprep').onclick=()=>showTab('prep');$('toTrain').onclick=()=>showTab('train');$('deploy').onclick=startMission;document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 $('move').onclick=()=>{mode='move';renderBattle()};$('attack').onclick=()=>{mode='attack';hint('attack');renderBattle()};$('acc').onclick=accButton;$('guard').onclick=guardAct;$('interact').onclick=interact;$('carry').onclick=carryAct;$('end').onclick=endTurn;$('extract').onclick=withdraw;
 $('board').onmouseleave=()=>{if(hoverCell){hoverCell=null;renderBattle()}};
 $('replayHints').onclick=()=>{if(!save)return;save.settings.tutorialSeen=save.settings.tutorialSeen.filter(x=>x==='tour');persist(false);hintQueue=[];['deploy','move','attack','warn','cache','extract'].forEach(hint)};
