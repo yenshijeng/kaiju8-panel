@@ -43,6 +43,7 @@ textarea{min-height:100px;resize:vertical}
 .bar{height:6px;background:#253e4c;border-radius:9px;margin:4px 0}.bar i{display:block;height:100%;background:#70d39a}
 .log{max-height:220px;overflow:auto;padding:8px;background:#07131e;border:1px solid #294453;border-radius:8px}.log p{margin:4px 0;font-size:13px}
 .notice{border-left:3px solid var(--gold);padding:8px 10px;background:#dbb55712;color:#e6d5a8;border-radius:5px}
+.storytext{white-space:pre-wrap;line-height:1.75;font-size:15px;max-height:62vh;overflow:auto;padding:4px 2px}#storyInput{min-height:130px}
 .hint{border-left:3px solid var(--cyan);padding:8px 10px;background:#67d4e014;border-radius:5px;margin-top:9px}
 .event{padding:10px;margin:8px 0;border:1px solid #415b6b;border-radius:8px}
 .order{font-size:12px;color:var(--muted);margin:6px 0}.order b{color:var(--gold)}
@@ -73,7 +74,7 @@ textarea{min-height:100px;resize:vertical}
 <button id="create" class="primary">建立戰役</button><div class="notice" style="margin-top:12px">存檔只寫入本機瀏覽器，並支援 JSON 匯出／匯入；任務前後自動保留最近 3 份備份。此版本尚無雲端同步。</div>
 </section>
 <section id="game" class="hidden">
-<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">DEFENSE FORCE OPERATIONS</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">與 AI 對話</button></div></div></div>
+<div class="card"><div class="row" style="justify-content:space-between"><div><div class="eyebrow">DEFENSE FORCE OPERATIONS</div><h2 id="title">戰役</h2></div><div class="tabs"><button class="tab hidden" id="tabStory" data-tab="story">劇情</button><button class="tab active" data-tab="campaign">戰役</button><button class="tab" data-tab="train">訓練</button><button class="tab" data-tab="prep">整備與簡報</button><button class="tab" data-tab="battle">戰鬥</button><button class="tab" data-tab="handoff">AI 記錄與設定</button></div></div></div>
 <section id="campaign" class="screen"><div class="grid2"><div class="card"><h2 id="pcname"></h2><div id="stats" class="statgrid"></div><p id="bioText" class="muted"></p><p id="injury" class="notice"></p><p id="growth" class="muted"></p><p id="dayLine" class="notice"></p><div class="row"><button id="tourBtn" class="ghost">重看新手導覽</button><button id="restBtn">休養一日（恢復傷勢、補給 +4、刷新任務板）</button><button id="toTrain">前往訓練</button><button id="toprep" class="primary">整備與任務簡報</button></div></div><div class="card"><div id="debrief"></div><h3>隊伍</h3><div id="party" class="party"></div><p id="score" class="muted"></p><h3>任務紀錄</h3><div id="history" class="log"></div></div></div></section>
 <section id="train" class="screen hidden"><div class="grid2"><div class="card"><div class="eyebrow">TRAINING</div><h2>訓練</h2><p id="gpLine" class="notice"></p><p class="muted">每項訓練花 1 點成長選擇點，確認後不能退回。未用的點數會保留。</p>
 <div class="box"><h4>屬性訓練</h4><div class="row"><select id="trAttr" style="width:auto"></select><button id="doAttr">提升 +1</button></div><p id="trAttrNote" class="muted"></p></div>
@@ -86,6 +87,7 @@ textarea{min-height:100px;resize:vertical}
 <section id="battle" class="screen hidden"><div class="grid2"><div class="card"><div class="row" style="justify-content:space-between"><h2 id="round">戰鬥</h2><span id="turn" class="notice"></span></div><div id="order" class="order"></div><div style="overflow:auto"><div id="board" class="board"></div></div><p class="muted">綠框可移動 · 紅框可攻擊 · 綠邊可治療 · 紅底敵方預警 · 黃框回收 · 綠邊撤離</p>
 <div class="row"><button id="move">移動 1 AP／格</button><button id="attack">普通攻擊 1 AP</button><span id="skillBtns" class="row"></span><button id="acc">輔助裝備</button><button id="guard">守勢 1 AP</button><button id="interact">互動 1 AP</button><button id="carry">搬運倒地隊友 1 AP</button><button id="end" class="gold">結束行動</button><button id="extract" class="danger">撤離</button></div>
 <div id="modeNote" class="muted" style="margin-top:6px;font-size:13px"></div><div id="reaction" class="notice hidden" style="margin-top:9px"></div><div id="wdBox" class="notice hidden" style="margin-top:9px"></div><div id="hint" class="hint hidden"></div><div class="row" style="margin-top:8px"><button id="replayHints" class="ghost">重看教學提示</button></div></div><div><div class="card"><h3>隊員狀態</h3><div id="battleParty" class="party"></div></div><div class="card"><h3>任務目標</h3><div id="objective"></div><h3>作戰紀錄</h3><div id="combatLog" class="log"></div></div></div></div></section>
+<section id="story" class="screen hidden"><div class="grid2"><div class="card"><h3>最新劇情</h3><div id="storyStat" class="muted" style="margin-bottom:6px"></div><div id="storyText" class="storytext">（還沒有 AI 的回覆。先在右邊寫下你想做的事，按「送出給 AI」。）</div></div><div class="card"><h3>你要做什麼？</h3><p class="muted">寫下你的行動或想說的話，AI 會接著寫劇情。目前的進度（隊伍、結果）會自動一起傳給 AI。</p><textarea id="storyInput" placeholder="例如：我先問米娜隊長今天的任務重點。"></textarea><div class="row" style="margin-top:8px"><button id="storySend" class="primary">送出給 AI</button><button id="storyToChat" class="ghost">回聊天室看完整紀錄</button></div><div id="pendNote" style="margin-top:8px"></div><div class="muted" id="storyHint" style="margin-top:8px"></div></div></div></section>
 <section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>傳送目前進度給 AI</h3><p class="muted">AI 看不到你的存檔，每次要先把「目前進度」（角色、隊伍、結果）傳給它，它才能接著寫劇情。在聊天框直接打字送出，面板會自動附上，不必手動操作。</p><label>你的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">把目前進度填入聊天框</button> <button id="sendBtn">填入並送出</button><label style="display:block;margin-top:6px"><input type="checkbox" id="autoAttach"> 送出聊天時，自動把最新進度一起傳給 AI（建議保持勾選）</label><div class="muted" id="autoStat" style="margin-top:6px">AI 回覆記錄：待命</div></div><details id="adv" style="margin-top:8px"><summary>進階（手動複製進度資料）</summary><button id="snapshot" class="primary">產生資料</button> <button id="copySnap">複製</button><textarea id="snapshotOut" readonly></textarea></details></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（整段貼上即可；在 LunaTalk 內會自動讀取，不用貼）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">讀取 AI 回覆</button><label>AI 建議記錄的事（情報、關係等），怎麼處理？</label><select id="policy"><option value="auto-low">小情報自動記下（可撤銷），其他交我確認</option><option value="review-all">全部交我確認</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>等你確認的記錄</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
 </section></main>
 <script>
@@ -381,7 +383,8 @@ const TOUR=[
  {tab:'battle',t:'戰鬥怎麼玩',b:'輪到你時有幾點 <b>AP（行動點）</b>：移動、攻擊、技能都會花 AP。紅底格是敵人下一輪會打的位置，記得閃開。AP 用完或不想動了就按「結束行動」。'},
  {tab:'train',t:'訓練頁：變強的地方',b:'升級和一般任務會給<b>成長點</b>。用成長點加屬性、學新技能或選專長；打任務賺的<b>回收點數</b>可以申請裝備和補給。'},
  {tab:'prep',t:'整備與簡報：出任務前先看',b:'這裡選出擊隊友（最多 3 人）、換裝備、看任務目標。補給不夠時，先休養或申請補給。大約每 3 天要休養 1 天。'},
- {tab:'handoff',t:'和 AI 對話',b:'想要劇情時，<b>直接在聊天框打字送出</b>就好，面板會自動把你的目前進度一起傳給 AI（建議保持勾選）。AI 回覆後面板會自動記下重要的事，需要你確認的會放在這一頁。'}];
+ {tab:'story',t:'劇情頁：和 AI 對話的地方',b:'AI 寫的劇情會顯示在這一頁。在右邊（手機在下面）寫下你要做什麼、說什麼，按「送出給 AI」就好，不用複製貼上，目前進度會自動一起傳過去。想看完整聊天紀錄，按「回聊天室」或上方的「回聊天」，再回來時按圓形按鈕就好。'},
+ {tab:'handoff',t:'AI 記錄與設定',b:'AI 回覆裡的重要情報會自動記下；需要你確認的（例如關係變化）會放在這一頁，劇情頁也會提醒你。一般情況下不用動這裡。'}];
 let tourStep=-1;
 function maybeTour(){if(!save||tourStep>=0||save.settings.tutorialSeen.includes('tour'))return;if(M()&&M().phase==='battle')return;tourOpen(0)}
 function tourOpen(i){tourStep=i;let st=TOUR[i],box=$('tourBox');if(!box){box=document.createElement('div');box.id='tourBox';box.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:12px;display:flex;justify-content:center;pointer-events:none';document.body.appendChild(box)}
@@ -423,7 +426,7 @@ function startMission(){if(M()&&M().phase==='battle'){alert('目前任務尚未�
  save.currentMission={id:uid(),title:def.title,chapterId:def.chapterId,goal:def.goal||'clear',civilians:clone(def.civilians||[]),zone:clone(def.zone||[]),holdRounds:def.holdRounds||0,held:0,reinf:def.reinf?clone(def.reinf):null,spawnWarn:null,rcount:0,spec:{id:def.id,supplyCost:cost,goal:def.goal||'clear',layoutId:def.layoutId,key:def.key,templateId:def.templateId,diff:def.diff,xpMult:def.xpMult,pts:def.pts,day:save.campaign.day},rule:{key:def.rule,label:rule.label,cap:rule.cap},phase:'battle',round:0,width:W,height:H,actors:actors,
   enemies:clone(def.enemies),walls:def.walls.slice(),cache:{x:def.cache.x,y:def.cache.y,recovered:false},extraction:{x:def.extraction.x,y:def.extraction.y},carryingIntel:false,rescued:[],kills:0,log:[],intent:{},order:[],orderIndex:0,activeActorId:null,equippedSkillIds:(save.playerCharacter.equippedSkillIds||[]).slice()};
  save.campaign.phase='battle';save.campaign.missionCount++;save.narrativeState.timeMarker=def.chapterId==='sagamihara-opening'?'相模原作戰中':'第 '+save.campaign.day+' 日　出擊中';save.narrativeState.locationId=def.chapterId==='sagamihara-opening'?'sagamihara':'field';
- say('任務開始：'+def.title+'（'+rule.label+'）。'+((def.goal||'clear')==='rescue'?'引導 '+def.civilians.length+' 名平民撤離（相鄰按互動）。':(def.goal||'clear')==='hold'?'守住藍框防線 '+def.holdRounds+' 回合。':'擊倒 '+def.enemies.filter(e=>e.objective).length+' 隻指定怪獸；游蕩個體不計入主要目標。'));actors.forEach(a=>{if(a.id!=='player'&&a.effLv<memberLevel(a.id))say(a.name+' 依訓練規定限制出力：Lv'+memberLevel(a.id)+' → Lv'+a.effLv+'。')});showTab('battle');hint('deploy');if(def.chapterId==='tutorial')hint('tutGoal');startRound()}
+ say('任務開始：'+def.title+'（'+rule.label+'）。'+((def.goal||'clear')==='rescue'?'引導 '+def.civilians.length+' 名平民撤離（相鄰按互動）。':(def.goal||'clear')==='hold'?'守住藍框防線 '+def.holdRounds+' 回合。':'擊倒 '+def.enemies.filter(e=>e.objective).length+' 隻指定怪獸；游蕩個體不計入主要目標。'));actors.forEach(a=>{if(a.id!=='player'&&a.effLv<memberLevel(a.id))say(a.name+' 依訓練規定限制出力：Lv'+memberLevel(a.id)+' → Lv'+a.effLv+'。')});showTab('battle');hint('deploy');if(def.chapterId==='tutorial')hint('tutGoal');if(window.__kjPost)window.__kjPost({t:'want',open:true});startRound()}
 function planIntents(){let m=M();m.intent={};let civ=(m.civilians||[]).filter(c=>c.state==='wait');m.enemies.forEach(e=>{if(e.hp<=0||(e.status&&e.status.staggered))return;let t=m.actors.filter(standing).concat(civ).sort((a,b)=>dist(e,a)-dist(e,b))[0];if(t&&dist(e,t)<=1){let it={targetId:t.id,x:t.x,y:t.y};if(e.large){let dx=t.x-e.x,dy=t.y-e.y,add=(x,y)=>{if(x>=0&&y>=0&&x<W&&y<H&&!m.walls.includes(x+','+y))it.cells.push({x,y})};it.cells=[{x:t.x,y:t.y}];if(e.boss&&e.phase===2){if(dx){add(t.x,t.y-1);add(t.x,t.y+1)}else{add(t.x-1,t.y);add(t.x+1,t.y)}it.knock=[dx,dy]}else add(t.x+dx,t.y+dy)}m.intent[e.id]=it}})}
 function agiOf(a){return a.stats?a.stats.agi:a.agi||1}
 function startRound(){let m=M();if(!m||m.phase!=='battle')return;m.round++;waitingPlayer=false;if(m.goal==='hold')holdStep(m);
@@ -701,7 +704,7 @@ function applyQueued(i,action){let e=save.eventQueue[i];if(!e)return;let base={i
  applyEvent(e,p,false);save.eventHistory.push(Object.assign(base,{result:action==='edit'?'玩家修改後接受':'玩家接受',payload:p,original:action==='edit'?e.payload:undefined}));save.eventQueue.splice(i,1);persist(true);render()}
 function undoAuto(id){let ns=save.narrativeState,idx=ns.intel.findIndex(x=>x.sourceEventId===id&&x.autoApplied);if(idx<0){alert('找不到這筆自動記下的情報');return}if(!confirm('撤銷這筆情報？\n「'+ns.intel[idx].text+'」'))return;ns.intel.splice(idx,1);let h=save.eventHistory.find(x=>x.id===id&&x.result==='自動套用');if(h)h.undone=true;save.eventHistory.push({id,type:'intel.record',result:'玩家撤銷自動套用',processedAt:now()});persist(true);render()}
 function eventLabel(e){let p=e.payload||{};switch(e.type){case 'intel.record':return '情報：'+p.text+(e.targetId?'（'+nameOf(e.targetId)+'得知）':'');case 'relationship.setStage':return '關係：'+nameOf(e.targetId)+' → '+p.stage;case 'relationship.setFriction':return '摩擦：'+nameOf(e.targetId)+' → '+(p.active?'有摩擦':'解除');case 'story.flag.set':return '旗標：'+((save.narrativeState.flagRegistry[p.flagId]||{}).label||p.flagId)+' = '+p.value;case 'narrative.condition.set':return '狀態：'+nameOf(e.targetId)+'「'+p.label+'」'+(p.active===false?'移除':'');default:return e.type}}
-function renderQueue(){if(!save)return;let q=$('queue');q.innerHTML=save.eventQueue.length?'':'<p class="muted">目前沒有需要確認的記錄。</p>';
+function renderQueue(){if(!save)return;let pn=$('pendNote');if(pn){pn.innerHTML=save.eventQueue.length?'<div class="notice">有 '+save.eventQueue.length+' 筆記錄等你確認　<button id="goQ" class="ghost mini">前往確認</button></div>':'';let gq=$('goQ');if(gq)gq.onclick=()=>showTab('handoff')}let q=$('queue');q.innerHTML=save.eventQueue.length?'':'<p class="muted">目前沒有需要確認的記錄。</p>';
  save.eventQueue.forEach((e,i)=>{let d=document.createElement('div');d.className='event';d.innerHTML='<b>'+esc(eventLabel(e))+'</b><br><small class="muted">'+esc(e.reviewReason)+(e.basis&&e.basis.quote?' · 依據：「'+esc(e.basis.quote)+'」':'')+'</small><div class="row" style="margin-top:6px"><button data-a>接受</button><button data-e class="gold">修改後接受</button><button data-r class="danger">拒絕</button></div>';d.querySelector('[data-a]').onclick=()=>applyQueued(i,'accept');d.querySelector('[data-e]').onclick=()=>applyQueued(i,'edit');d.querySelector('[data-r]').onclick=()=>applyQueued(i,'reject');q.appendChild(d)});
  let log=$('eventLog');log.innerHTML='';let items=save.eventHistory.slice(-15).reverse();if(!items.length){log.innerHTML='<p class="muted">尚無處理紀錄。</p>';return}
  items.forEach(e=>{let pEl=document.createElement('p');pEl.innerHTML=esc(e.id)+' · '+esc(e.result==='自動套用'?'自動記下':e.result)+(e.payload&&e.type?' · '+esc(eventLabel(e)):'');if(e.result==='自動套用'&&!e.undone){let b=document.createElement('button');b.className='ghost mini';b.textContent='撤銷';b.onclick=()=>undoAuto(e.id);pEl.append(' ',b)}log.appendChild(pEl)})}
@@ -726,12 +729,18 @@ $('parse').onclick=parseEvents;$('policy').onchange=()=>{if(!save)return;save.se
 $('attrs').onclick=e=>{let b=e.target.closest('[data-k]');if(!b)return;let used=Object.keys(stats).reduce((n,k)=>n+stats[k]-1,0),d=+b.dataset.d,k=b.dataset.k;if(d<0&&stats[k]>1||d>0&&stats[k]<4&&used<8)stats[k]+=d;renderStats()};
 renderStats();renderTeam();$('origin').onchange();
 // ===== LunaTalk 嵌入（由外層頁面載入時啟用）=====
-(function(){if(window.parent===window){$('adv').open=true;return}$('embedBar').classList.remove('hidden');
+(function(){if(window.parent===window){$('adv').open=true;return}$('embedBar').classList.remove('hidden');$('tabStory').classList.remove('hidden');
  var P=window.parent;function post(m){try{P.postMessage(Object.assign({kj:1},m),'*')}catch(e){}}
  function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send});if(send)$('playerAction').value=''}
- $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);
+ $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);window.__kjPost=post;
+ window.storyWait=function(on,sec){let e=$('storyStat');if(!e)return;e.textContent=on?'⏳ AI 回覆中…'+(sec?'（'+sec+' 秒'+(sec>=60?'，等很久了，可能卡住':sec>=20?'，回應較慢':'')+'）':''):''};
+ $('storySend').onclick=()=>{let v=$('storyInput').value.trim();if(!v){toast('先寫下你想做什麼');return}$('playerAction').value=v;go(true);$('storyInput').value='';storyWait(true,0);toast('已送出，等待 AI 回覆')};
+ $('storyToChat').onclick=()=>post({t:'min'});
+ $('storyInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();$('storySend').click()}});
  addEventListener('message',function(e){var d=e.data;if(!d||d.kj!==1||e.source!==P)return;
   if(d.t==='stat')$('autoStat').textContent='AI 回覆記錄：'+d.s;
+  else if(d.t==='story'){$('storyText').textContent=d.text;let st=$('storyText');st.scrollTop=0;storyWait(false)}
+  else if(d.t==='wait'){storyWait(d.on,d.sec)}
   else if(d.t==='fillres')toast(d.s);
   else if(d.t==='consumed'){$('playerAction').value='';let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;persist(false)}armedId=null;arm()}
   else if(d.t==='events'){var r;try{r=ingestReply(d.text)}catch(x){r={status:'error',msg:String(x)}}
@@ -742,9 +751,9 @@ renderStats();renderTeam();$('origin').onchange();
   save.snapshotRegistry=save.snapshotRegistry.filter(x=>!(x.armed&&!x.consumed));
   let sn=buildSnap('');save.snapshotRegistry.push({snapshotId:sn.snapshotId,sourceRevision:sn.sourceRevision,createdAt:sn.createdAt,processed:false,armed:true});
   armedRev=save.revision;armedCamp=save.campaignId;armedId=sn.snapshotId;persist(false);
-  post({t:'arm',id:sn.snapshotId,obj:sn,tail:replyTail(sn)})}
+  post({t:'arm',id:sn.snapshotId,obj:compactSnap(sn)||{},tail:replyTail(sn)})}
  window.__kjArmSoon=function(){try{arm()}catch(x){}};
- $('autoAttach').checked=(function(){try{return localStorage.getItem('kj.autoattach')==='1'}catch(x){return false}})();
+ $('autoAttach').checked=(function(){try{return localStorage.getItem('kj.autoattach')!=='0'}catch(x){return true}})();
  $('autoAttach').onchange=function(){try{localStorage.setItem('kj.autoattach',this.checked?'1':'0')}catch(x){}armedId=null;arm()};
  post({t:'hello'});setTimeout(window.__kjArmSoon,800);
 })();
