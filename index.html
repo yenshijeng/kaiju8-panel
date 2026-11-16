@@ -944,6 +944,7 @@ window.__kjSay=function(text){window.__kjBusyAt=Date.now();setTimeout(()=>{try{$
  let can=true;try{localStorage.setItem('kj.probe','1');localStorage.removeItem('kj.probe')}catch(x){can=false}
  if(!can){setTimeout(()=>toast('此瀏覽器不允許面板儲存資料，關掉就會消失；請隨時用「選單 → 匯出 JSON」備份'),600);return}
  try{let list=JSON.parse(lsGet(INDEX)||'[]');if(list.length&&!save){let raw=lsGet(PREFIX+list[0].campaignId);if(raw){adopt(JSON.parse(raw),'自動載入');setTimeout(()=>toast('已自動載入上次的戰役：'+list[0].name),400)}}}catch(x){console.warn('autoload failed',x)}})();
+document.addEventListener('click',function(e){var m=document.getElementById('menu');if(!m||!m.open)return;var t=e.target;if(!m.contains(t)){m.open=false;return}if(t.closest&&t.closest('.menuPop button'))setTimeout(function(){m.open=false},0)});
 })();
 
 </script></body></html>
