@@ -339,6 +339,7 @@ function parseOptions(txt){let lines=String(txt||'').split(/\n+/).map(l=>l.trim(
   for(let i=lines.length-1;i>=Math.max(0,lines.length-4);i--){let parts=lines[i].split(/(?=[①-⑩])/).map(x=>m(x.trim())).filter(Boolean);if(parts.length>=2)return parts}
   return []}
  function optAct(t){if(!save||(M()&&M().phase==='battle'))return null;if(/^(出擊|出動|接下任務|前往任務)/.test(t)){let b=(save.board&&save.board.missions)||[],c=t.replace(/[\s｜|：:（）()・]/g,''),hit=b.find(x=>{let a=x.title.replace(/^★/,'').split('｜');return a.every(p=>c.includes(p.replace(/[\s：:]/g,'')))})||b.find(x=>x.title.replace(/^★/,'').split('｜').some(p=>p.length>=2&&c.includes(p.replace(/[\s：:]/g,''))));return {k:'deploy',id:hit?hit.id:null}}if(/^(休養一日|今天到此為止|結束今天|休養一天)/.test(t))return {k:'rest'};return null}
+ function isRecap(t){return /^[\s\S]{0,40}?(劇情彙整|劇情匯整|劇情摘要|劇情回顧|劇情總結|前情提要|前情回顧|故事彙整|故事摘要|對話摘要|章節摘要|剧情汇总|剧情摘要|剧情回顾)/.test(String(t||'').slice(0,60))}
  function renderStory(txt){let el=$('storyText');if(!el)return;let lines=String(txt||'').split(/\n/),cut=-1;for(let i=lines.length-1;i>=0;i--)if(/^\s*[*＊]*[【\[]?\s*你可以/.test(lines[i])){cut=i;break}if(cut>0&&parseOptions(txt).length)lines=lines.slice(0,cut);
  el.innerHTML=lines.join('\n').split(/\n{2,}|\n/).map(x=>x.trim()).filter(Boolean).map(x=>'<p class="'+(/[「『]/.test(x)?'sd':'sp')+'">'+esc(x)+'</p>').join('');el.scrollTop=0}
  function renderOptions(txt){let box=$('storyOpts');if(!box)return;box._txt=txt;let o=parseOptions(txt),gen=false;if(!o.length&&String(txt||'').trim().length>20&&save&&!save.campaign.dailyDue&&!save.campaign.ended){o=[{k:'①',t:'繼續，讓劇情自然往下走'},{k:'②',t:'仔細觀察周圍，看看有什麼動靜'},{k:'③',t:'找身邊的隊友聊聊現在的狀況'}];gen=true}o.forEach(x=>{x.act=optAct(x.t)});box.innerHTML=(gen?'<div class="muted" style="font-size:12px;margin-bottom:4px">AI 這次沒有給行動建議，以下是通用選擇：</div>':'')+o.map((x,i)=>'<button class="opt'+(x.act?' act':'')+'" data-opt="'+i+'"><b>'+(x.act?(x.act.k==='rest'?'🛏':'⚔'):esc(x.k))+'</b><span>'+esc(x.t)+(x.act?'<small>'+(x.act.k==='rest'?'面板會推進到隔天':'開啟任務板，確認後部署')+'</small>':'')+'</span></button>').join('');box.classList.toggle('hidden',!o.length);box._o=o}
@@ -906,7 +907,7 @@ window.__kjSay=function(text){window.__kjBusyAt=Date.now();setTimeout(()=>{try{$
  $('storyInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();$('storySend').click()}});
  addEventListener('message',function(e){var d=e.data;if(!d||d.kj!==1||e.source!==P)return;
   if(d.t==='stat')$('autoStat').textContent='AI 回覆記錄：'+d.s;
-  else if(d.t==='story'){renderStory(d.text);renderOptions(d.text);storyWait(false)}
+  else if(d.t==='story'){if(isRecap(d.text)){storyWait(false);return}renderStory(d.text);renderOptions(d.text);storyWait(false)}
   else if(d.t==='wait'){window.__kjBusy=!!d.on;storyWait(d.on,d.sec);if(d.on&&$('storyOpts'))$('storyOpts').classList.add('hidden')}
   else if(d.t==='fillres')toast(d.s);
   else if(d.t==='consumed'){$('playerAction').value='';let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;if(save.campaign.sinceTalk){save.campaign.sinceTalk=null}persist(false)}armedId=null;arm()}
