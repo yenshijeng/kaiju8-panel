@@ -898,7 +898,7 @@ document.addEventListener('click',e=>{let b=e.target.closest('[data-dbg]');if(!b
 // ===== LunaTalk 嵌入（由外層頁面載入時啟用）=====
 (function(){if(window.parent===window){$('adv').open=true;return}$('embedBar').classList.remove('hidden');$('tabStory').classList.remove('hidden');
  var P=window.parent;function post(m){try{P.postMessage(Object.assign({kj:1},m),'*')}catch(e){}}
- function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send});if(send)$('playerAction').value=''}
+ function go(send){makeSnapshot();var t=$('snapshotOut').value;if(!t)return;post({t:'fill',text:t,send:send});if(send){$('playerAction').value='';window.__kjBusyAt=Date.now()}}
  $('fillBtn').onclick=()=>go(false);$('sendBtn').onclick=()=>go(true);window.__kjPost=post;
  window.storyWait=function(on,sec){let e=$('storyStat');if(!e)return;e.textContent=on?'⏳ AI 回覆中…'+(sec?'（'+sec+' 秒'+(sec>=60?'，等很久了，可能卡住':sec>=20?'，回應較慢':'')+'）':''):''};
  $('storySend').onclick=()=>{let v=$('storyInput').value.trim();if(!v){toast('先寫下你想做什麼');return}$('playerAction').value=v;go(true);$('storyInput').value='';storyWait(true,0);toast('已送出，等待 AI 回覆')};
