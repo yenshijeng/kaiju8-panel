@@ -85,7 +85,7 @@ main{margin-top:10px;padding-bottom:96px}
 .dailyGrid{display:grid;gap:8px}.dopt{display:grid;grid-template-columns:150px 1fr;gap:4px 10px;align-items:center;background:#0a1924;border:1px solid #2b4757;border-radius:9px;padding:8px}.dopt select{grid-column:1/-1}.daily{border-color:#e0b659}@media(max-width:680px){.dopt{grid-template-columns:1fr}}.storyOpts{display:grid;gap:8px;margin:8px 0}.storyOpts .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:11px 12px;font-size:15px;line-height:1.5;background:#12384a;border:1px solid #3b8da0;border-radius:10px}.storyOpts .opt b{color:#ffd479;flex:0 0 auto;min-width:1.4em}.storyOpts .opt:hover{background:#17506a}.storyOpts .opt.act{background:#4a3a14;border-color:#c9a24a}.storyOpts .opt small{display:block;color:#c9b98a;font-size:12px}.kbar{display:inline-block;width:90px;height:8px;background:#0006;border-radius:4px;vertical-align:middle;overflow:hidden}.kbar i{display:block;height:100%}</style>
 </head>
 <body>
-<header><div class="brand">怪獸 8 號戰術 RPG<small id="dayChip"></small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><details id="menu"><summary>選單</summary><div class="menuPop"><button id="load">載入戰役</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><button id="menuNew">建立新戰役</button><button id="menuHandoff">AI 記錄與設定</button><button id="menuTour" class="ghost">重看新手導覽</button><label class="check" style="margin:0"><input type="checkbox" id="quickMode">速戰模式（跳過日常、不經過 AI）</label><div class="muted" id="verTap" style="font-size:12px;padding:4px 2px;user-select:none">存檔格式 1.4.0</div></div></details><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
+<header><div class="brand">怪獸 8 號戰術 RPG<small id="dayChip"></small></div><div class="tools"><span id="saved" class="muted">尚未建立戰役</span><details id="menu"><summary>選單</summary><div class="menuPop"><button id="load">載入戰役</button><button id="backups">備份</button><button id="export" disabled>匯出 JSON</button><button id="import">匯入 JSON</button><button id="menuNew">建立新戰役</button><button id="menuHandoff">AI 記錄與設定</button><button id="menuTour" class="ghost">重看新手導覽</button><label class="check" style="margin:0"><input type="checkbox" id="quickMode">速戰模式（跳過日常、不經過 AI）</label><div class="muted" id="verTap" style="font-size:12px;padding:4px 2px;user-select:none">存檔格式 1.4.0 · lt-store 1.0</div></div></details><input id="file" type="file" accept=".json,application/json" class="hidden"></div></header>
 <main>
 <section id="setup" class="card">
 <div class="eyebrow">CAMPAIGN SETUP</div><h2>建立防衛隊戰役</h2><p class="muted">選既有角色或建立新隊員。戰鬥屬性此後不可重分配，只能靠訓練提升。</p>
@@ -120,9 +120,205 @@ main{margin-top:10px;padding-bottom:96px}
 <section id="handoff" class="screen hidden"><div class="grid2"><div class="card"><h3>傳送目前進度給 AI</h3><p class="muted">AI 看不到你的存檔，每次要先把「目前進度」（角色、隊伍、結果）傳給它，它才能接著寫劇情。在聊天框直接打字送出，面板會自動附上，不必手動操作。</p><label>你的行動或對話</label><textarea id="playerAction" placeholder="由你輸入；面板不會替你決定"></textarea><div id="embedBar" class="hidden" style="margin:8px 0"><button id="fillBtn" class="primary">把目前進度填入聊天框</button> <button id="sendBtn">填入並送出</button><label style="display:block;margin-top:6px"><input type="checkbox" id="autoAttach"> 送出聊天時，自動把最新進度一起傳給 AI（建議保持勾選）</label><div class="muted" id="autoStat" style="margin-top:6px">AI 回覆記錄：待命</div></div><details id="dbg" style="margin-top:8px;display:none"><summary>測試用：直接調整狀態（一般玩家不用看）</summary><p class="muted">前兩排只對「日比野卡夫卡」開局的戰役有效；最後一排只對自創角色的戰役有效（要先完成至少一場任務）。套用後到劇情頁隨便送一則訊息，AI 就會收到新狀態。</p><div class="row"><button data-dbg="expo95">暴露＝95</button><button data-dbg="ero95">侵蝕＝95</button><button data-dbg="ero100">侵蝕＝100（直接結局）</button></div><div class="row" style="margin-top:6px"><button data-dbg="base">暴露＝100（基地遇襲）</button><button data-dbg="trial">已曝光（直接進試煉）</button><button data-dbg="clear">清除怪獸狀態</button></div><div class="row" style="margin-top:6px"><button data-dbg="npc8">自創角色：已目擊卡夫卡變身</button></div></details><details id="adv" style="margin-top:8px"><summary>進階（手動複製進度資料）</summary><button id="snapshot" class="primary">產生資料</button> <button id="copySnap">複製</button><textarea id="snapshotOut" readonly></textarea></details></div><div class="card"><h3>貼回 AI 回覆</h3><label>貼上 AI 的完整回覆（整段貼上即可；在 LunaTalk 內會自動讀取，不用貼）</label><textarea id="aiReply"></textarea><button id="parse" class="primary">讀取 AI 回覆</button><label>AI 建議記錄的事（情報、關係等），怎麼處理？</label><select id="policy"><option value="auto-low">小情報自動記下（可撤銷），其他交我確認</option><option value="review-all">全部交我確認</option></select><p class="muted">戰鬥、傷勢、獎勵、成長與玩家決策由面板保留，AI 無法改動。</p></div></div><div class="card"><h3>等你確認的記錄</h3><div id="queue"></div><h3>處理紀錄</h3><div id="eventLog" class="log"></div></div></section>
 </section></main>
 <script>
+/* lt-store v1.0 — LunaTalk 面板共用存檔模組
+ * 底層 IndexedDB，前面放一層記憶體快取：
+ *   - 開機時 await store.ready（一次把這款遊戲的資料全部讀進記憶體）
+ *   - 之後 get/set/del 都是同步的，寫入在背景合併送進 IndexedDB
+ *   - 舊的 localStorage 存檔會自動搬過來，確認寫入成功後才刪掉舊的
+ *   - IndexedDB 打不開時退回 localStorage（跟舊版行為一樣），再不行就只存在記憶體
+ * 用法：
+ *   const S = LTStore.create('kaiju8', {migrate:['kaiju.','kj.']});
+ *   S.onError = e => 顯示「存檔失敗」;
+ *   await S.ready;  S.get(k) / S.set(k, 字串) / S.del(k) / S.keys(前綴)
+ *   S.mode: 'idb' | 'local' | 'memory'
+ */
+(function (G) {
+  if (G.LTStore) return;
+  var DBN = 'yenshijeng-lt-store', ST = 'kv', VER = 1, SEP = '\u0001';
+  var dbP = null;
+
+  function openDB() {
+    return new Promise(function (res, rej) {
+      var done = false, r;
+      function fail(e) { if (!done) { done = true; rej(e); } }
+      setTimeout(function () { fail(new Error('IndexedDB 開啟逾時')); }, 4000);
+      try { r = indexedDB.open(DBN, VER); } catch (e) { fail(e); return; }
+      r.onupgradeneeded = function () {
+        var db = r.result;
+        if (!db.objectStoreNames.contains(ST)) db.createObjectStore(ST);
+      };
+      r.onsuccess = function () {
+        if (done) { try { r.result.close(); } catch (e) {} return; }
+        done = true; var db = r.result;
+        db.onversionchange = function () { try { db.close(); } catch (e) {} dbP = null; };
+        res(db);
+      };
+      r.onerror = function () { fail(r.error || new Error('IndexedDB 開啟失敗')); };
+      r.onblocked = function () { fail(new Error('IndexedDB 被其他分頁鎖住')); };
+    });
+  }
+  function getDB() { if (!dbP) dbP = openDB().catch(function (e) { dbP = null; throw e; }); return dbP; }
+
+  function lsOK() {
+    try { localStorage.setItem('__lt_probe', '1'); localStorage.removeItem('__lt_probe'); return true; }
+    catch (e) { return false; }
+  }
+  function lsKeys(prefixes) {
+    var o = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && prefixes.some(function (p) { return k.indexOf(p) === 0; })) o.push(k);
+      }
+    } catch (e) {}
+    return o;
+  }
+
+  function create(ns, opt) {
+    opt = opt || {};
+    var P = ns + SEP, prefixes = opt.migrate || [];
+    var cache = new Map(), dirty = new Map(), timer = 0, chain = Promise.resolve(), bc = null;
+    var S = { ns: ns, mode: 'loading', migrated: 0, lastError: null, onError: null };
+
+    function report(e, where) {
+      S.lastError = { at: Date.now(), where: where, msg: String((e && (e.message || e.name)) || e) };
+      try { if (S.onError) S.onError(S.lastError); } catch (x) {}
+    }
+
+    /* ---- 同步介面 ---- */
+    S.get = function (k) { var v = cache.get(k); return v === undefined ? null : v; };
+    S.has = function (k) { return cache.has(k); };
+    S.keys = function (prefix) {
+      var o = []; cache.forEach(function (v, k) { if (!prefix || k.indexOf(prefix) === 0) o.push(k); }); return o;
+    };
+    S.set = function (k, v) { v = String(v); cache.set(k, v); dirty.set(k, v); schedule(); };
+    S.del = function (k) { cache.delete(k); dirty.set(k, null); schedule(); };
+
+    /* ---- 背景寫入 ---- */
+    function schedule() {
+      if (S.mode === 'loading' || timer) return;
+      timer = setTimeout(function () { timer = 0; S.flush(); }, opt.delay == null ? 30 : opt.delay);
+    }
+    function writeIDB(batch) {
+      return getDB().then(function (db) {
+        return new Promise(function (res, rej) {
+          var tx = db.transaction(ST, 'readwrite'), st = tx.objectStore(ST);
+          batch.forEach(function (v, k) { if (v === null) st.delete(P + k); else st.put(v, P + k); });
+          tx.oncomplete = function () { res(); };
+          tx.onerror = function () { rej(tx.error || new Error('寫入失敗')); };
+          tx.onabort = function () { rej(tx.error || new Error('寫入中止')); };
+        });
+      });
+    }
+    function writeLocal(batch) {
+      batch.forEach(function (v, k) { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); });
+      return Promise.resolve();
+    }
+    function write(batch) {
+      if (S.mode === 'idb') return writeIDB(batch);
+      if (S.mode === 'local') return writeLocal(batch);
+      return Promise.resolve();
+    }
+    S.flush = function () {
+      if (timer) { clearTimeout(timer); timer = 0; }
+      if (S.mode === 'loading' || !dirty.size) return chain;
+      var batch = dirty; dirty = new Map();
+      chain = chain.then(function () { return write(batch); }).then(function () {
+        if (bc) { var o = {}; batch.forEach(function (v, k) { o[k] = v; }); try { bc.postMessage(o); } catch (e) {} }
+      }, function (e) {
+        batch.forEach(function (v, k) { if (!dirty.has(k)) dirty.set(k, v); });
+        report(e, 'write');
+      });
+      return chain;
+    };
+
+    /* ---- 開機：讀取＋搬家 ---- */
+    function readAll(db) {
+      return new Promise(function (res, rej) {
+        var out = [], tx = db.transaction(ST, 'readonly'), st = tx.objectStore(ST);
+        var rq = st.openCursor(IDBKeyRange.bound(P, P + '￿'));
+        rq.onsuccess = function () {
+          var c = rq.result;
+          if (c) { out.push([String(c.key).slice(P.length), c.value]); c.continue(); } else res(out);
+        };
+        rq.onerror = function () { rej(rq.error); };
+      });
+    }
+    function migrate() {
+      if (!prefixes.length || !lsOK()) return Promise.resolve();
+      var moved = new Map();
+      lsKeys(prefixes).forEach(function (k) {
+        if (cache.has(k) || dirty.has(k)) return;
+        var v = localStorage.getItem(k); if (v === null) return;
+        cache.set(k, v); moved.set(k, v);
+      });
+      if (!moved.size) return Promise.resolve();
+      return writeIDB(moved).then(function () {
+        return getDB().then(readAll);
+      }).then(function (rows) {
+        var got = new Map(rows);
+        moved.forEach(function (v, k) {
+          if (got.get(k) === v && opt.removeLegacy !== false) { try { localStorage.removeItem(k); } catch (e) {} }
+        });
+        S.migrated = moved.size;
+      }).catch(function (e) {
+        /* 搬家失敗：舊資料原封不動留在 localStorage，快取裡已有，之後的正常寫入會再試 */
+        moved.forEach(function (v, k) { if (!dirty.has(k)) dirty.set(k, v); });
+        report(e, 'migrate');
+      });
+    }
+    function loadLocal() {
+      lsKeys(prefixes).forEach(function (k) { if (!dirty.has(k)) cache.set(k, localStorage.getItem(k)); });
+    }
+
+    S.ready = (function () {
+      var hasIDB = false; try { hasIDB = !!G.indexedDB; } catch (e) {}
+      var p = hasIDB ? getDB().then(readAll) : Promise.reject(new Error('沒有 IndexedDB'));
+      return p.then(function (rows) {
+        rows.forEach(function (r) { if (!dirty.has(r[0])) cache.set(r[0], r[1]); });
+        S.mode = 'idb';
+        return migrate();
+      }, function (e) {
+        report(e, 'open');
+        if (lsOK()) { S.mode = 'local'; loadLocal(); } else S.mode = 'memory';
+      }).then(function () {
+        try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
+        try {
+          if (S.mode !== 'memory' && G.BroadcastChannel) {
+            bc = new BroadcastChannel('lt-store:' + ns);
+            bc.onmessage = function (ev) {
+              var o = ev.data || {};
+              for (var k in o) { if (dirty.has(k)) continue; if (o[k] === null) cache.delete(k); else cache.set(k, o[k]); }
+            };
+          }
+        } catch (e) {}
+        S.flush();
+        return S;
+      });
+    })();
+
+    S.usage = function () {
+      var bytes = 0; cache.forEach(function (v, k) { bytes += (k.length + v.length) * 2; });
+      var r = { mode: S.mode, keys: cache.size, approxKB: Math.round(bytes / 1024) };
+      if (!(navigator.storage && navigator.storage.estimate)) return Promise.resolve(r);
+      return navigator.storage.estimate().then(function (e) { r.originUsage = e.usage; r.originQuota = e.quota; return r; }, function () { return r; });
+    };
+
+    function flushNow() { try { S.flush(); } catch (e) {} }
+    G.addEventListener('pagehide', flushNow);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushNow(); });
+    return S;
+  }
+
+  G.LTStore = { version: '1.0', create: create };
+})(window);
+
+</script>
+<script>
 (function(){
 'use strict';
 // ===== 常數 =====
+const KS=LTStore.create('kaiju8',{migrate:['kaiju.','kj.']});window.__kjKS=KS;
 const SCHEMA='1.4.0',PREFIX='kaiju.tacticalRpg.campaign.v1.',INDEX='kaiju.tacticalRpg.index.v1',BACKUP='kaiju.tacticalRpg.backup.v1.';
 const LABELS={str:'力量',agi:'敏捷',sta:'體能',apt:'戰鬥適性'};
 const XP_TABLE=[0,80,180,300,440,600,780,980,1200,1440];
@@ -346,8 +542,8 @@ function parseOptions(txt){let lines=String(txt||'').split(/\n+/).map(l=>l.trim(
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function bigToast(s){toast(s);let b=document.getElementById('kjBig');if(!b){b=document.createElement('div');b.id='kjBig';b.style.cssText='position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:99990;background:#2a1d0a;border:1px solid #e0b659;color:#ffe2a8;padding:10px 16px;border-radius:10px;font-size:15px;max-width:90vw;box-shadow:0 8px 24px #000c;text-align:center';document.body.appendChild(b)}b.textContent=s;b.style.display='block';clearTimeout(bigToast.t);bigToast.t=setTimeout(()=>{b.style.display='none'},4500)}
 function toast(s){$('saved').textContent=s;clearTimeout(toast.t);toast.t=setTimeout(()=>{if(save)$('saved').textContent='已自動儲存 · 修訂 '+save.revision},2000)}
-function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
-function lsSet(k,v){localStorage.setItem(k,v)}
+function lsGet(k){return KS.get(k)}
+function lsSet(k,v){KS.set(k,v)}
 let save=null,stats={str:3,agi:3,sta:3,apt:3},mode='move',reaction=null,timer=null,waitingPlayer=false,hintQueue=[],hoverCell=null;
 // ===== 技能 =====
 function makeSkill(tplId,name,effect,source){let t=SKILL_TPL[tplId];return {id:'skill-'+uid().slice(0,8),name:name||t.label,template:tplId,tier:t.adv?'advanced':'normal',level:1,attr:t.attr,power:t.power,impact:t.impact,apCost:t.apCost,mpCost:t.mpCost,range:t.range,shape:t.shape,needsLos:t.needsLos,friendlyFire:false,effect:effect===undefined?t.effects[0]:effect,pinTurns:1,stableBonus:0,branch:{level2:null,level3:null},source:source||'creation'}}
@@ -438,6 +634,7 @@ function kjConvSeen(id,u){if(!id)return;window.__kjConvLast=id;let m=kjConvMap()
  if(u>0&&!save.campaign.conv){kjConvBind(id);persist(false);return}
  kjConvAsk(id,u)}
 function persist(bump){if(!save)return;if(window.__kjPendConv){kjConvBind(window.__kjPendConv);window.__kjPendConv=null}if(window.__kjArmSoon)setTimeout(window.__kjArmSoon,350);if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
+ if(save.snapshotRegistry&&save.snapshotRegistry.length>80)save.snapshotRegistry=save.snapshotRegistry.slice(-80);
  try{lsSet(PREFIX+save.campaignId,JSON.stringify(save));let list=JSON.parse(lsGet(INDEX)||'[]').filter(x=>x.campaignId!==save.campaignId);list.unshift({campaignId:save.campaignId,name:save.campaign.name,savedAt:save.savedAt});lsSet(INDEX,JSON.stringify(list.slice(0,20)));$('saved').textContent='已自動儲存 · 修訂 '+save.revision;$('export').disabled=false}catch(e){$('saved').textContent='儲存失敗，請匯出 JSON'}}
 function backupNow(reason){if(!save)return;try{let cur=lsGet(PREFIX+save.campaignId);if(!cur)return;let list=JSON.parse(lsGet(BACKUP+save.campaignId)||'[]');let d=JSON.parse(cur);list.unshift({at:now(),reason,revision:d.revision,schemaVersion:d.schemaVersion,data:cur});lsSet(BACKUP+save.campaignId,JSON.stringify(list.slice(0,3)))}catch(e){}}
 function verParts(v){let m=/^(\d+)\.(\d+)\.(\d+)$/.exec(String(v||''));return m?[+m[1],+m[2],+m[3]]:null}
@@ -976,14 +1173,15 @@ window.__kjSay=function(text){window.__kjBusyAt=Date.now();setTimeout(()=>{try{$
   armedRev=save.revision;armedCamp=save.campaignId;armedId=sn.snapshotId;persist(false);
   post({t:'arm',id:sn.snapshotId,obj:compactSnap(sn)||{},tail:replyTail(sn)})}
  window.__kjArmSoon=function(){try{arm()}catch(x){}};
- $('autoAttach').checked=(function(){try{return localStorage.getItem('kj.autoattach')!=='0'}catch(x){return true}})();
- $('autoAttach').onchange=function(){try{localStorage.setItem('kj.autoattach',this.checked?'1':'0')}catch(x){}armedId=null;arm()};
- post({t:'hello'});setTimeout(window.__kjArmSoon,800);
+ $('autoAttach').checked=lsGet('kj.autoattach')!=='0';
+ $('autoAttach').onchange=function(){lsSet('kj.autoattach',this.checked?'1':'0');armedId=null;arm()};
+ KS.ready.then(function(){$('autoAttach').checked=lsGet('kj.autoattach')!=='0';post({t:'hello'});setTimeout(window.__kjArmSoon,800)});
 })();
-(function(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(x){}
- let can=true;try{localStorage.setItem('kj.probe','1');localStorage.removeItem('kj.probe')}catch(x){can=false}
- if(!can){setTimeout(()=>toast('此瀏覽器不允許面板儲存資料，關掉就會消失；請隨時用「選單 → 匯出 JSON」備份'),600);return}
- try{let list=JSON.parse(lsGet(INDEX)||'[]');if(list.length&&!save){let raw=lsGet(PREFIX+list[0].campaignId);if(raw){adopt(JSON.parse(raw),'自動載入');setTimeout(()=>toast('已自動載入上次的戰役：'+list[0].name),400)}}}catch(x){console.warn('autoload failed',x)}})();
+(function(){KS.onError=function(e){try{$('saved').textContent='儲存失敗，請匯出 JSON';toast('存檔寫入失敗（'+e.msg+'），請用「選單 → 匯出 JSON」備份')}catch(x){}};
+ KS.ready.then(function(){try{if(window.__kjDbgApply)window.__kjDbgApply()}catch(x){}
+ if(KS.mode==='memory'){setTimeout(()=>toast('此瀏覽器不允許面板儲存資料，關掉就會消失；請隨時用「選單 → 匯出 JSON」備份'),600);return}
+ if(KS.migrated)console.info('lt-store: 已把 '+KS.migrated+' 筆舊存檔搬到 IndexedDB');
+ try{let list=JSON.parse(lsGet(INDEX)||'[]');if(list.length&&!save){let raw=lsGet(PREFIX+list[0].campaignId);if(raw){adopt(JSON.parse(raw),'自動載入');setTimeout(()=>toast('已自動載入上次的戰役：'+list[0].name),400)}}}catch(x){console.warn('autoload failed',x)}})})();
 document.addEventListener('click',function(e){var m=document.getElementById('menu');if(!m||!m.open)return;var t=e.target;if(!m.contains(t)){m.open=false;return}if(t.closest&&t.closest('.menuPop button'))setTimeout(function(){m.open=false},0)});
 })();
 
