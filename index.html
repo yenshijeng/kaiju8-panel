@@ -401,7 +401,29 @@ function newCampaign(){let origin=$('origin').value,name=$('name').value.trim()|
  roster.slice(1).forEach(a=>save.narrativeState.relationships[a.id]={stage:'普通',friction:false});
  persist(true);enterGame('campaign')}
 // ===== 存檔、備份、遷移 =====
-function persist(bump){if(!save)return;if(window.__kjArmSoon)setTimeout(window.__kjArmSoon,350);if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
+const CONVMAP='kaiju.tacticalRpg.convmap.v1';
+function kjConvMap(){try{return JSON.parse(lsGet(CONVMAP)||'{}')||{}}catch(e){return {}}}
+function kjConvBind(id){if(!save||!id)return;let m=kjConvMap();m[id]=save.campaignId;let ks=Object.keys(m);if(ks.length>40)delete m[ks[0]];try{lsSet(CONVMAP,JSON.stringify(m))}catch(e){}save.campaign.conv=id}
+function kjConvClose(){let b=document.getElementById('kjConv');if(b)b.remove()}
+function kjConvAsk(id){kjConvClose();let c=save.campaign,b=document.createElement('div');b.id='kjConv';b.style.cssText='position:fixed;inset:0;z-index:99980;background:rgba(3,10,18,.78);display:flex;align-items:center;justify-content:center;padding:16px';
+ b.innerHTML='<div style="max-width:440px;width:100%;background:#0f2233;border:1px solid #67d4e0;border-radius:12px;padding:16px;color:#eef5f9;font-size:14px;line-height:1.6"><b style="color:#67d4e0;font-size:16px">偵測到新的聊天對話</b><p style="margin:8px 0 12px">LunaTalk 這邊開了新對話，面板目前是戰役「'+esc(c.name||'')+'」（第 '+(c.day||1)+' 日）。這個新對話要怎麼玩？</p>'+
+ '<button data-cv="go" class="primary" style="width:100%;margin-bottom:8px">接續目前戰役（AI 會依面板資料接著寫）</button>'+
+ '<button data-cv="new" style="width:100%;margin-bottom:8px">建立新戰役（目前戰役保留在本機，可再載入）</button>'+
+ '<button data-cv="later" style="width:100%">先不決定</button></div>';
+ b.addEventListener('click',e=>{let k=e.target.closest('[data-cv]');if(!k)return;let v=k.dataset.cv;kjConvClose();
+  if(v==='go'){kjConvBind(id);persist(false);toast('已把這個對話接到目前戰役');window.__kjSay('【接續進度】這是新開的對話。請依附上的面板資料，簡短交代我們現在的處境與今天的狀況，接著目前進度寫下去，不要重演開場或重新建立角色。')}
+  else if(v==='new'){window.__kjPendConv=id;window.__kjConvSkip=null;stopTimers();save=null;$('game').classList.add('hidden');$('setup').classList.remove('hidden');$('saved').textContent='建立新戰役（會接到這個新對話）'}
+  else window.__kjConvSkip=id});
+ document.body.appendChild(b)}
+function kjConvSeen(id,u){if(!id)return;window.__kjConvLast=id;let m=kjConvMap(),cid=m[id];
+ if(cid){if(save&&save.campaignId===cid){save.campaign.conv=id;return}let raw=lsGet(PREFIX+cid);if(raw&&adopt(JSON.parse(raw),'切換對話')){toast('已切換到這個對話的戰役：'+save.campaign.name)}return}
+ if(!save){window.__kjPendConv=id;return}
+ if(window.__kjConvSkip===id)return;
+ if(!save.campaign.conv&&u>0){kjConvBind(id);persist(false);return}
+ if(save.campaign.conv===id)return;
+ if(u>0&&!save.campaign.conv){kjConvBind(id);persist(false);return}
+ kjConvAsk(id)}
+function persist(bump){if(!save)return;if(window.__kjPendConv){kjConvBind(window.__kjPendConv);window.__kjPendConv=null}if(window.__kjArmSoon)setTimeout(window.__kjArmSoon,350);if(bump)save.revision++;save.savedAt=now();syncPC();save.progression.level=save.progression.members.player.level;save.progression.xp=save.progression.members.player.xp;save.progression.nextXp=nextXpFor(save.progression.level);save.narrativeState.allowedFlagIds=Object.keys(save.narrativeState.flagRegistry);
  try{lsSet(PREFIX+save.campaignId,JSON.stringify(save));let list=JSON.parse(lsGet(INDEX)||'[]').filter(x=>x.campaignId!==save.campaignId);list.unshift({campaignId:save.campaignId,name:save.campaign.name,savedAt:save.savedAt});lsSet(INDEX,JSON.stringify(list.slice(0,20)));$('saved').textContent='已自動儲存 · 修訂 '+save.revision;$('export').disabled=false}catch(e){$('saved').textContent='儲存失敗，請匯出 JSON'}}
 function backupNow(reason){if(!save)return;try{let cur=lsGet(PREFIX+save.campaignId);if(!cur)return;let list=JSON.parse(lsGet(BACKUP+save.campaignId)||'[]');let d=JSON.parse(cur);list.unshift({at:now(),reason,revision:d.revision,schemaVersion:d.schemaVersion,data:cur});lsSet(BACKUP+save.campaignId,JSON.stringify(list.slice(0,3)))}catch(e){}}
 function verParts(v){let m=/^(\d+)\.(\d+)\.(\d+)$/.exec(String(v||''));return m?[+m[1],+m[2],+m[3]]:null}
@@ -926,6 +948,7 @@ window.__kjSay=function(text){window.__kjBusyAt=Date.now();setTimeout(()=>{try{$
   if(d.t==='stat')$('autoStat').textContent='AI 回覆記錄：'+d.s;
   else if(d.t==='story'){if(isRecap(d.text)){storyWait(false);return}renderStory(d.text);renderOptions(d.text);storyWait(false)}
   else if(d.t==='wait'){window.__kjBusy=!!d.on;storyWait(d.on,d.sec);if(d.on&&$('storyOpts'))$('storyOpts').classList.add('hidden')}
+  else if(d.t==='conv'){try{kjConvSeen(String(d.id||''),+d.u||0)}catch(x){console.warn(x)}}
   else if(d.t==='fillres')toast(d.s);
   else if(d.t==='consumed'){$('playerAction').value='';let r=save&&save.snapshotRegistry.find(x=>x.snapshotId===d.id);if(r){r.consumed=true;if(save.campaign.sinceTalk){save.campaign.sinceTalk=null}persist(false)}armedId=null;arm()}
   else if(d.t==='events'){var r;try{r=ingestReply(d.text)}catch(x){r={status:'error',msg:String(x)}}
